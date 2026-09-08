@@ -1,0 +1,1 @@
+(() => {const filter=document.querySelector('.shop-filter');const desktop=matchMedia('(min-width:1024px)');if(filter){filter.open=desktop.matches;desktop.addEventListener('change',event=>filter.open=event.matches);}})();

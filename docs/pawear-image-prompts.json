@@ -1,0 +1,38 @@
+{
+  "mode": "built-in imagegen",
+  "purpose": "User-requested concept imagery for PAWEAR storefront redesign; not documentation of existing stock.",
+  "commonPrompt": "Luxury editorial fashion photography for a premium socks store. Photorealistic, exceptionally tactile ribbed cotton, refined cinematic directional lighting, sophisticated restrained espresso/plum, cool pale stone and subtle copper palette. No text, no logos, no watermark, no UI.",
+  "assets": [
+    {
+      "original": "public/images/pawear-editorial/campaign-socks.png",
+      "optimized": "public/images/pawear-editorial/campaign-socks.webp",
+      "prompt": "Luxury editorial fashion photography for a premium socks store. Photorealistic, exceptionally tactile ribbed cotton, refined cinematic directional lighting, sophisticated restrained espresso/plum, cool pale stone and subtle copper palette. No text, no logos, no watermark, no UI. Use case: ads-marketing. Asset: landscape website hero, 1536x1024. Stylish adult lower legs wearing cream ribbed crew socks, seated at a sculptural dark walnut studio bench; dark leather loafers nearby. Deep espresso studio background. Fashion campaign composition with subjects clustered mostly in left half, calm dark negative space on right for subsequent Persian headline overlay. Crop above knees, convincing human anatomy."
+    },
+    {
+      "original": "public/images/pawear-editorial/campaign-box.png",
+      "optimized": "public/images/pawear-editorial/campaign-box.webp",
+      "prompt": "Luxury editorial fashion photography for a premium socks store. Photorealistic, exceptionally tactile ribbed cotton, refined cinematic directional lighting, sophisticated restrained espresso/plum, cool pale stone and subtle copper palette. No text, no logos, no watermark, no UI. Use case: product-mockup. Asset: landscape website hero, 1536x1024. Elegant open rigid dark burgundy gift box holding exactly three neatly rolled socks in ivory, espresso brown and charcoal, soft tissue paper. Slate tabletop, directional spotlight, premium minimalist still life. Box occupies left half; expansive calm dark negative space on right for subsequent Persian typography."
+    },
+    {
+      "original": "public/images/pawear-editorial/sock-ivory.png",
+      "optimized": "public/images/pawear-editorial/sock-ivory.webp",
+      "prompt": "Luxury editorial fashion photography for a premium socks store. Photorealistic, exceptionally tactile ribbed cotton, refined cinematic directional lighting, sophisticated restrained espresso/plum, cool pale stone and subtle copper palette. No text, no logos, no watermark, no UI. Use case: product-mockup. Asset: square 1024x1024 catalog photograph. Exactly one pair of ivory ribbed crew socks laid flat elegantly overlapping, both complete socks visible, on cool pale stone seamless studio surface. Top-down slightly oblique framing, centered, generous margins, precise realistic macro textile stitches and subtle soft directional shadows. No other objects."
+    },
+    {
+      "original": "public/images/pawear-editorial/sock-espresso.png",
+      "optimized": "public/images/pawear-editorial/sock-espresso.webp",
+      "prompt": "Luxury editorial fashion photography for a premium socks store. Photorealistic, exceptionally tactile ribbed cotton, refined cinematic directional lighting, sophisticated restrained espresso/plum, cool pale stone and subtle copper palette. No text, no logos, no watermark, no UI. Use case: product-mockup. Asset: square 1024x1024 catalog photograph. Exactly one pair of deep espresso brown ribbed crew socks laid flat elegantly overlapping, both complete socks visible, on cool pale stone seamless studio surface. Top-down slightly oblique framing, centered, generous margins, precise realistic macro textile stitches and subtle soft directional shadows. No other objects."
+    },
+    {
+      "original": "public/images/pawear-editorial/sock-charcoal.png",
+      "optimized": "public/images/pawear-editorial/sock-charcoal.webp",
+      "prompt": "Luxury editorial fashion photography for a premium socks store. Photorealistic, exceptionally tactile ribbed cotton, refined cinematic directional lighting, sophisticated restrained espresso/plum, cool pale stone and subtle copper palette. No text, no logos, no watermark, no UI. Use case: product-mockup. Asset: square 1024x1024 catalog photograph. Exactly one pair of charcoal athletic crew socks with exactly two understated ivory stripes around each cuff laid flat elegantly overlapping, both complete socks visible, on cool pale stone seamless studio surface. Top-down slightly oblique framing, centered, generous margins, precise realistic macro textile stitches and subtle soft directional shadows. No other objects."
+    },
+    {
+      "original": "public/images/pawear-editorial/collection-editorial.png",
+      "optimized": "public/images/pawear-editorial/collection-editorial.webp",
+      "prompt": "Luxury editorial fashion photography for a premium socks store. Photorealistic, exceptionally tactile ribbed cotton, refined cinematic directional lighting, sophisticated restrained espresso/plum, cool pale stone and subtle copper palette. No text, no logos, no watermark, no UI. Use case: product-mockup. Asset: square 1024x1024 category editorial photograph. Curated three pairs of cream, espresso brown, and charcoal ribbed socks neatly folded and sculpturally stacked on a dark walnut plinth, deep plum espresso studio background. High-end studio still life, beautifully readable fabric textures, generous breathing room, directional warm light grazing the ribbing, quiet luxury."
+    }
+  ],
+  "notes": "Gift output has folded socks instead of tightly rolled socks; accepted as a visual concept."
+}

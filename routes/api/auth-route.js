@@ -1,0 +1,13 @@
+const router=require('express').Router();
+const c=require('../../controller/auth-controller');
+const v=require('../../validation/auth-validation');
+const {validate}=require('../../middleware/validate');
+const {authRateLimit}=require('../../middleware/auth-rate-limit');
+const {protect}=require('../../middleware/auth-middleware');
+router.post('/register',authRateLimit,validate(v.registerSchema),c.register);
+router.post('/login',authRateLimit,validate(v.loginSchema),c.login);
+router.post('/otp/request',authRateLimit,validate(v.otpRequestSchema),c.requestOtp);
+router.post('/otp/verify',authRateLimit,validate(v.otpVerifySchema),c.verifyOtpCode);
+router.put('/password',authRateLimit,protect,validate(v.setPasswordSchema),c.setPassword);
+router.post('/logout',protect,c.logout);
+module.exports=router;

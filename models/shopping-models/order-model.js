@@ -1,0 +1,65 @@
+const { Schema, model } = require('mongoose');
+const snapshot = new Schema({
+    name: String, slug: String, sku: String, coverImage: String
+}, { _id: false });
+const address = new Schema({
+    addressId: Schema.Types.ObjectId, title: String, recipientName: String, recipientPhone: String, province: String, city: String, addressLine: String, postalCode: String, buildingNumber: String, unit: String
+}, { _id: false });
+const orderSchema = new Schema({
+    orderNumber: {
+        type: String, required: true, unique: true
+    }, user: {
+        type: Schema.Types.ObjectId, ref: 'User', required: true
+    }, shippingAddressSnapshot: { type: address, default: null },
+    items: {
+        type: [{
+                itemType: {
+                    type: String, enum: ['Product', 'Box'], required: true
+                }, item: { type: Schema.Types.ObjectId, required: true }, productSnapshot: { type: snapshot, required: true }, quantity: {
+                    type: Number, required: true, min: 1, validate: Number.isSafeInteger
+                }, unitPrice: {
+                    type: Number, required: true, min: 1, validate: Number.isSafeInteger
+                }, totalPrice: {
+                    type: Number, required: true, min: 1, validate: Number.isSafeInteger
+                }, discount: { type: Number, default: 0 }, components: [{
+                        product: {
+                            type: Schema.Types.ObjectId, ref: 'Product', required: true
+                        }, quantity: { type: Number, required: true }, name: String, sku: String, unitPrice: Number, _id: false
+                    }], _id: false
+            }], validate: v => v.length > 0, required: true
+    },
+    inventory: { type: [{
+                product: {
+                    type: Schema.Types.ObjectId, ref: 'Product', required: true
+                }, quantity: {
+                    type: Number, required: true, min: 1, validate: Number.isSafeInteger
+                }, _id: false
+            }], required: true },
+    stockState: {
+        type: String, enum: ['none', 'reserved', 'consumed', 'released'], default: 'none'
+    },
+    totalItems: {
+        type: Number, required: true, min: 1
+    }, totalPairs: {
+        type: Number, required: true, min: 1
+    }, subtotal: {
+        type: Number, required: true, min: 1
+    }, shippingAmount: {
+        type: Number, required: true, min: 0
+    }, totalAmount: {
+        type: Number, required: true, min: 1, validate: Number.isSafeInteger
+    },
+    status: {
+        type: String, enum: ['pending', 'payment_pending', 'review', 'confirmed', 'shipped', 'delivered', 'cancelled', 'expired'], default: 'pending'
+    },
+    paymentStatus: {
+        type: String, enum: ['unpaid', 'pending', 'paid', 'failed', 'refunded'], default: 'unpaid'
+    },
+    shippedAt: Date, deliveredAt: Date, customerReceivedAt: Date,
+    cartRevision: { type: Number, required: true }, priceExpiresAt: { type: Date, required: true }, trackingCode: {
+        type: String, default: '', maxlength: 100
+    }
+}, { timestamps: true, optimisticConcurrency: true });
+orderSchema.index({ user: 1 }, { unique: true, partialFilterExpression: { status: 'pending' } });
+orderSchema.index({ user: 1, createdAt: -1 });
+module.exports = model('Order', orderSchema);

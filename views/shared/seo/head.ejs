@@ -1,0 +1,11 @@
+<link rel="preload" href="/fonts/vazirmatn/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><%= title %></title>
+<meta name="description" content="<%= seo.description %>"><meta name="robots" content="<%= seo.noindex ? 'noindex,follow' : 'index,follow' %>">
+<link rel="canonical" href="<%= seo.canonical %>"><meta property="og:locale" content="fa_IR"><meta property="og:site_name" content="PAWEAR"><meta property="og:title" content="<%= title %>"><meta property="og:description" content="<%= seo.description %>"><meta property="og:url" content="<%= seo.canonical %>">
+<% if(seo.jsonld) { %><script type="application/ld+json" nonce="<%= nonce %>"><%- JSON.stringify(seo.jsonld).replace(/</g, '\\u003c') %></script><% } %>
+<link rel="stylesheet" href="/stylesheet/base/variables.css"><link rel="stylesheet" href="/stylesheet/base/global.css"><link rel="stylesheet" href="/stylesheet/shared/header/header.css"><link rel="stylesheet" href="/stylesheet/shared/footer/footer.css"><link rel="stylesheet" href="/stylesheet/shared/product-card/product-card.css"><link rel="stylesheet" href="/stylesheet/shared/integration/integration.css">
+<script src="/javascript/shared/api/api.js" defer></script>
+<link rel="stylesheet" href="/stylesheet/shared/refinement.css">
+<script src="/javascript/shared/lifecycle.js" defer></script>
+
+<script src="/javascript/shared/wishlist.js" defer></script>

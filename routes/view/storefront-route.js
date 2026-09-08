@@ -1,0 +1,26 @@
+const router = require('express').Router();
+const c = require('../../controller/storefront/storefront-controller');
+const { requireViewUser } = require('../../middleware/view-context');
+router.get('/', c.home);
+router.get('/shop', c.shop);
+router.get('/boxes', c.boxes);
+router.get('/product/:slug', c.product('Product'));
+router.get('/box/:slug', c.product('Box'));
+router.get('/login', c.auth('login'));
+router.get('/signup', c.auth('signup'));
+router.get('/login/password', requireViewUser, (req, res) => {
+  if (req.auth.method !== 'otp' || Date.now()/1000-req.auth.authTime >= 600) return res.redirect('/login?method=otp&reset=1');
+  res.render('pages/auth/password', {title:'رمز تازه برای حساب تو'});
+});
+router.get('/cart', requireViewUser, c.cart);
+router.get('/wishlist', requireViewUser, c.wishlist);
+router.get('/checkout', requireViewUser, c.checkout);
+router.get('/account', requireViewUser, c.account);
+router.get('/orders/:id', requireViewUser, c.order);
+router.get('/about', c.info('درباره پاور', 'پاور از «پا» و wear به معنای پوشیدن ساخته شده است؛ نامی با یادآوری قدرت. در پاور، جوراب‌ها را به‌صورت تکی و باکس‌های آماده عرضه می‌کنیم. همه مدل‌ها فری‌سایز هستند و هر طرح، محصول مستقلی دارد.'));
+router.get('/contact', c.info('تماس با پاور', process.env.STORE_CONTACT || 'اطلاعات رسمی تماس فروشگاه هنوز تنظیم نشده است.'));
+router.get('/size-guide', c.info('راهنمای سایز', 'تمام جوراب‌های فعلی پاور فری‌سایز هستند. جزئیات هر مدل را پیش از خرید در صفحه همان محصول بررسی کنید.'));
+router.get('/shipping', c.info('ارسال و بازگشت', process.env.STORE_SHIPPING_POLICY || 'هزینه ارسال در سبد خرید نمایش داده می‌شود. زمان ارسال و شرایط بازگشت باید پیش از شروع فروش توسط فروشگاه اعلام شود.'));
+router.get('/terms', c.info('قوانین فروشگاه', process.env.STORE_TERMS || 'قوانین نهایی فروشگاه هنوز منتشر نشده است.'));
+router.get('/privacy', c.info('حریم خصوصی', process.env.STORE_PRIVACY_POLICY || 'اطلاعات حساب، آدرس و سفارش برای پردازش خرید ذخیره می‌شوند. متن نهایی سیاست حریم خصوصی پیش از شروع فروش منتشر می‌شود.'));
+module.exports = router;

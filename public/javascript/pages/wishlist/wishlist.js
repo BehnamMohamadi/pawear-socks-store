@@ -1,0 +1,1 @@
+document.querySelectorAll('[data-wishlist]').forEach(button=>{button.setAttribute('aria-label','حذف از علاقه‌مندی‌ها');button.setAttribute('aria-pressed','true');button.querySelector('svg')?.setAttribute('fill','currentColor');});

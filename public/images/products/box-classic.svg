@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 800">
+<rect width="900" height="800" rx="64" fill="#F3F4F1"/>
+<rect x="120" y="220" width="660" height="400" rx="34" fill="#121413"/>
+<rect x="155" y="258" width="590" height="325" rx="28" fill="#1c1f1d"/>
+<g transform="translate(210,285)">
+<rect width="130" height="245" rx="55" fill="#fff"/>
+<rect x="0" width="130" height="35" rx="15" fill="#8CFF00"/>
+<text x="65" y="135" text-anchor="middle" font-family="Arial" font-size="52" font-weight="900" fill="#111312">P.</text>
+</g>
+<g transform="translate(385,285)">
+<rect width="130" height="245" rx="55" fill="#2f5f38"/>
+<rect x="0" width="130" height="35" rx="15" fill="#8CFF00"/>
+<text x="65" y="135" text-anchor="middle" font-family="Arial" font-size="52" font-weight="900" fill="#fff">P.</text>
+</g>
+<g transform="translate(560,285)">
+<rect width="130" height="245" rx="55" fill="#0f1110"/>
+<rect x="0" width="130" height="35" rx="15" fill="#8CFF00"/>
+<text x="65" y="135" text-anchor="middle" font-family="Arial" font-size="52" font-weight="900" fill="#fff">P.</text>
+</g>
+<text x="450" y="685" text-anchor="middle" font-family="Arial" font-size="32" font-weight="700" fill="#111312">PAWEAR BOX</text>
+</svg>

@@ -1,0 +1,11 @@
+const router=require('express').Router();
+const c=require('../../../controller/shopping-controllers/cart-controller');
+const {protect,restrictTo}=require('../../../middleware/auth-middleware');
+const {validate}=require('../../../middleware/validate');
+const {validateParam}=require('../../../middleware/validate-param');
+const v=require('../../../validation/shopping-validations/cart-validation');
+router.use(protect);
+router.get('/all',restrictTo('admin'),c.getAllCarts);
+router.route('/').get(c.getCart).post(validate(v.addCartItemSchema),c.addCartItem).delete(c.clearCart);
+router.route('/:itemId').patch(validateParam('itemId',v.cartItemIdSchema),validate(v.updateCartItemSchema),c.updateCartItem).delete(validateParam('itemId',v.cartItemIdSchema),c.deleteCartItem);
+module.exports=router;

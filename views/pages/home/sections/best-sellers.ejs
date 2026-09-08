@@ -1,0 +1,19 @@
+
+<!-- Best seller product shelf -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">انتخاب‌های پاور</h2>
+        <p class="section-subtitle">جوراب‌های تازه و منتخب فروشگاه.</p>
+      </div>
+      <a class="link-arrow" href="/shop">مشاهده همه ←</a>
+    </div>
+
+    <% if(!products.length){ %><p class="empty-state">محصولات پاور به‌زودی اینجا عرضه می‌شوند.</p><% } %><div class="product-grid home-product-grid">
+      <% products.forEach((product) => { %>
+        <%- include('../../../shared/product-card/product-card', { product }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>

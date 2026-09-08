@@ -1,0 +1,5 @@
+let preparedOrder=null;
+document.querySelector('#addressForm').addEventListener('submit',Pawear.run(async event=>{await Pawear.request('/api/addresses','POST',{...Pawear.formData(event.currentTarget),isDefault:true});location.reload();}));
+document.querySelector('#checkoutForm').addEventListener('submit',Pawear.run(async event=>{const result=await Pawear.request('/api/orders','POST',Pawear.formData(event.currentTarget));preparedOrder=result.data.order;document.querySelector('#orderPreview').hidden=false;document.querySelector('#orderSummary').textContent='جمع محصولات: '+preparedOrder.subtotal.toLocaleString('fa-IR')+' + ارسال: '+preparedOrder.shippingAmount.toLocaleString('fa-IR')+' = '+preparedOrder.totalAmount.toLocaleString('fa-IR')+' تومان';}));
+document.querySelector('#checkoutForm').addEventListener('change',()=>{preparedOrder=null;document.querySelector('#orderPreview').hidden=true;});
+document.querySelector('#payOrder').addEventListener('click',Pawear.run(async()=>{if(preparedOrder)await Pawear.startPayment(preparedOrder._id);}));

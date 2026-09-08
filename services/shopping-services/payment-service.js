@@ -1,0 +1,228 @@
+const mongoose = require('mongoose');
+const crypto = require('node:crypto');
+const Payment = require('../../models/shopping-models/payment-model');
+const Order = require('../../models/shopping-models/order-model');
+const Product = require('../../models/product-models/product-model');
+const Cart = require('../../models/shopping-models/cart-model');
+const gatewayApi = require('./zarinpal-service');
+const { AppError } = require('../../utils/app-error');
+const { buildCartSnapshot } = require('./catalog-service');
+const WINDOW_MS = 10 * 60 * 1000;
+let timer = null;
+const transaction = fn => mongoose.connection.transaction(fn);
+const gatewayName = () => { const name = process.env.PAYMENT_GATEWAY || 'mock'; if (!['mock', 'zarinpal'].includes(name) || (name === 'mock' && process.env.NODE_ENV === 'production'))
+    throw new AppError(503, 'درگاه پرداخت پیکربندی نشده است.'); return name; };
+// stock is available-to-sell. Reservation and payment/order writes share one transaction.
+const takeStock = async (order, session) => {
+    for (const item of order.inventory) {
+        const r = await Product.updateOne({
+            _id: item.product, isActive: true, stock: { $gte: item.quantity }
+        }, { $inc: { stock: -item.quantity, __v: 1 } }, { session });
+        if (r.modifiedCount !== 1)
+            throw new AppError(409, 'موجودی یکی از جوراب‌ها کافی نیست.', null, 'INSUFFICIENT_STOCK');
+    }
+};
+const releaseStock = async (order, session) => {
+    if (order.stockState !== 'reserved')
+        return;
+    for (const item of order.inventory)
+        await Product.updateOne({ _id: item.product }, { $inc: { stock: item.quantity, __v: 1 } }, { session });
+    order.stockState = 'released';
+};
+const closeUnpaid = async (paymentId, status, reason) => transaction(async (session) => {
+    const payment = await Payment.findById(paymentId).session(session);
+    if (!payment || !['created', 'pending'].includes(payment.status))
+        return payment;
+    const order = await Order.findById(payment.order).session(session);
+    if (order) {
+        await releaseStock(order, session);
+        order.status = status === 'expired' ? 'expired' : 'cancelled';
+        order.paymentStatus = 'failed';
+        await order.save({ session });
+    }
+    payment.status = status;
+    payment.failureReason = reason;
+    await payment.save({ session });
+    return payment;
+});
+const expireStalePayments = async () => {
+    const rows = await Payment.find({ status: { $in: ['created', 'pending'] }, expiresAt: { $lte: new Date() } }).select('_id').limit(200);
+    for (const p of rows)
+        await closeUnpaid(p._id, 'expired', 'مهلت پرداخت تمام شد.');
+    return rows.length;
+};
+const startPaymentExpirationWorker = () => { if (timer)
+    return timer; const sweep = () => expireStalePayments().catch(e => console.error('[payment-expiration]', e.message)); sweep(); timer = setInterval(sweep, 15000); timer.unref(); return timer; };
+const stopPaymentExpirationWorker = () => { clearInterval(timer); timer = null; };
+const startPayment = async ({ user, orderId }) => {
+    const gateway = gatewayName();
+    const multiplier = Number(process.env.PAYMENT_AMOUNT_MULTIPLIER || 10);
+    if (!Number.isSafeInteger(multiplier) || multiplier < 1)
+        throw new AppError(503, 'واحد مبلغ درگاه معتبر نیست.');
+    await expireStalePayments();
+    const payment = await transaction(async (session) => {
+        const order = await Order.findOne({ _id: orderId, user: user._id }).session(session);
+        if (!order)
+            throw new AppError(404, 'سفارش پیدا نشد.');
+        if (order.status !== 'pending' || order.paymentStatus !== 'unpaid')
+            throw new AppError(409, 'سفارش آماده پرداخت نیست.', null, 'ORDER_NOT_PAYABLE');
+        if (order.priceExpiresAt <= new Date())
+            throw new AppError(409, 'قیمت سفارش منقضی شده؛ سفارش را دوباره آماده کنید.', null, 'ORDER_PRICE_EXPIRED');
+        if (!order.shippingAddressSnapshot?.addressId)
+            throw new AppError(400, 'آدرس ارسال لازم است.');
+        const cart = await Cart.findOne({ user: user._id }).session(session);
+        if (!cart || cart.revision !== order.cartRevision)
+            throw new AppError(409, 'سبد تغییر کرده؛ سفارش را دوباره آماده کنید.', null, 'CART_CHANGED');
+        const current = await buildCartSnapshot(cart, session);
+        const signature = items => JSON.stringify(items.map(i => ({
+            type: i.itemType, id: String(i.item), quantity: i.quantity, price: i.unitPrice, discount: i.discount, components: i.components.map(c => ({
+                id: String(c.product), quantity: c.quantity, price: c.unitPrice
+            }))
+        })));
+        if (signature(current.items) !== signature(order.items))
+            throw new AppError(409, 'قیمت یا ترکیب کالا تغییر کرده؛ سفارش را دوباره آماده کنید.', null, 'ORDER_CHANGED');
+        if (current.shippingAmount !== order.shippingAmount)
+            throw new AppError(409, 'هزینه ارسال تغییر کرده؛ سفارش را دوباره آماده کنید.', null, 'ORDER_CHANGED');
+        await takeStock(order, session);
+        order.stockState = 'reserved';
+        order.status = 'payment_pending';
+        order.paymentStatus = 'pending';
+        await order.save({ session });
+        cart.items = [];
+        cart.revision += 1;
+        await cart.save({ session });
+        const [p] = await Payment.create([{
+                user: user._id, order: order._id, gateway, amount: order.totalAmount, gatewayAmount: order.totalAmount * multiplier, status: 'created', expiresAt: new Date(Date.now() + WINDOW_MS)
+            }], { session });
+        return p;
+    });
+    try {
+        const result = gateway === 'mock' ? {
+            authority: 'MOCK-' + crypto.randomUUID(), code: 100, redirectUrl: null
+        } : await gatewayApi.requestPayment({
+            amount: payment.gatewayAmount, callbackUrl: process.env.PAYMENT_CALLBACK_URL, description: 'PAWEAR ' + payment.order, mobile: user.phonenumber, email: user.email
+        });
+        const pending = await Payment.findOneAndUpdate({ _id: payment._id, status: 'created' }, { $set: {
+                authority: result.authority, gatewayCode: result.code, status: 'pending'
+            } }, { returnDocument: 'after', runValidators: true });
+        if (!pending)
+            throw new AppError(409, 'مهلت پرداخت تمام شده است.');
+        return {
+            payment: pending, redirectUrl: result.redirectUrl, mockVerifyPath: gateway === 'mock' ? '/api/payments/mock/' + payment._id + '/success' : null
+        };
+    }
+    catch (e) {
+        await closeUnpaid(payment._id, 'failed', e.message);
+        throw e;
+    }
+};
+const finalizeSuccessfulPayment = async (paymentId, data) => transaction(async (session) => {
+    const p = await Payment.findById(paymentId).session(session);
+    if (!p)
+        throw new AppError(404, 'پرداخت پیدا نشد.');
+    if (['paid', 'refunded'].includes(p.status))
+        return p;
+    const order = await Order.findById(p.order).session(session);
+    if (!order)
+        throw new AppError(409, 'سفارش پرداخت پیدا نشد.');
+    const onTime = p.expiresAt > new Date() && ['created', 'pending'].includes(p.status) && order.status === 'payment_pending' && order.stockState === 'reserved';
+    p.status = 'paid';
+    p.referenceId = data.referenceId || null;
+    p.gatewayCode = data.code;
+    p.cardPan = data.cardPan || null;
+    p.cardHash = data.cardHash || null;
+    p.verifiedAt = new Date();
+    p.failureReason = null;
+    order.paymentStatus = 'paid';
+    if (onTime) {
+        order.stockState = 'consumed';
+        order.status = 'confirmed';
+        p.requiresReview = false;
+        p.reviewStatus = 'not_required';
+    }
+    else {
+        await releaseStock(order, session);
+        order.status = 'review';
+        p.requiresReview = true;
+        p.reviewStatus = 'pending';
+        p.reviewReason = 'پرداخت پس از پایان مهلت یا آزاد شدن موجودی تأیید شد.';
+        p.reviewHistory.push({ action: 'opened', reason: p.reviewReason });
+    }
+    await order.save({ session });
+    await p.save({ session });
+    return p;
+});
+const handleZarinpalCallback = async ({ authority, status }) => {
+    if (typeof authority !== 'string' || authority.length > 200)
+        throw new AppError(400, 'شناسه پرداخت معتبر نیست.');
+    const p = await Payment.findOne({ gateway: 'zarinpal', authority });
+    if (!p)
+        throw new AppError(404, 'پرداخت پیدا نشد.');
+    if (['paid', 'refunded'].includes(p.status))
+        return {
+            payment: p, verified: true, alreadyVerified: true
+        };
+    if (String(status).toUpperCase() !== 'OK')
+        return {
+            payment: await closeUnpaid(p._id, 'cancelled', 'پرداخت لغو شد.'), verified: false, alreadyVerified: false
+        };
+    // Never mark a bank timeout as a financial failure: leave it retryable.
+    const data = await gatewayApi.verifyPayment({ amount: p.gatewayAmount, authority });
+    return {
+        payment: await finalizeSuccessfulPayment(p._id, data), verified: true, alreadyVerified: data.alreadyVerified
+    };
+};
+const completeMockPayment = async ({ paymentId, userId }) => {
+    if (process.env.NODE_ENV === 'production')
+        throw new AppError(404, 'مسیر پیدا نشد.');
+    const p = await Payment.findOne({
+        _id: paymentId, user: userId, gateway: 'mock'
+    });
+    if (!p)
+        throw new AppError(404, 'پرداخت آزمایشی پیدا نشد.');
+    return finalizeSuccessfulPayment(p._id, { code: 100, referenceId: 'MOCK-REF-' + p._id });
+};
+const resolvePaymentReview = async ({ paymentId, adminUserId, resolution, refundReference }) => transaction(async (session) => {
+    const p = await Payment.findById(paymentId).session(session);
+    if (!p)
+        throw new AppError(404, 'پرداخت پیدا نشد.');
+    if (p.reviewStatus === 'resolved') {
+        if (p.resolution === resolution)
+            return p;
+        throw new AppError(409, 'نتیجه ثبت‌شده قابل تغییر نیست.', null, 'REVIEW_ALREADY_RESOLVED');
+    }
+    if (p.status !== 'paid' || !p.requiresReview || p.reviewStatus !== 'pending')
+        throw new AppError(409, 'این پرداخت نیاز به بررسی ندارد.');
+    const order = await Order.findById(p.order).session(session);
+    if (!order || order.status !== 'review')
+        throw new AppError(409, 'وضعیت سفارش معتبر نیست.');
+    if (resolution === 'stock_supplied') {
+        await takeStock(order, session);
+        order.stockState = 'consumed';
+        order.status = 'confirmed';
+    }
+    else if (resolution === 'refunded') {
+        if (!refundReference)
+            throw new AppError(400, 'شناسه بازپرداخت انجام‌شده لازم است.');
+        p.refundReference = refundReference;
+        order.status = 'cancelled';
+        order.paymentStatus = 'refunded';
+        p.status = 'refunded';
+    }
+    else
+        throw new AppError(400, 'نتیجه بررسی معتبر نیست.');
+    p.requiresReview = false;
+    p.reviewStatus = 'resolved';
+    p.resolution = resolution;
+    p.resolvedAt = new Date();
+    p.resolvedBy = adminUserId;
+    p.reviewHistory.push({
+        action: 'resolved', toResolution: resolution, actor: adminUserId, reason: p.reviewReason
+    });
+    await order.save({ session });
+    await p.save({ session });
+    return p;
+});
+module.exports = {
+    startPayment, handleZarinpalCallback, completeMockPayment, expireStalePayments, startPaymentExpirationWorker, stopPaymentExpirationWorker, resolvePaymentReview
+};

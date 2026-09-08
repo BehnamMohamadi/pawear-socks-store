@@ -1,0 +1,40 @@
+const Order = require('../../models/shopping-models/order-model');
+const { prepareCurrentOrder } = require('../../services/shopping-services/order-service');
+const { AppError } = require('../../utils/app-error');
+const { catchAsync } = require('../../utils/catch-async');
+const { ApiFeatures } = require('../../utils/api-features');
+const prepareOrder = catchAsync(async (req, res) => { const result = await prepareCurrentOrder(req.user._id, req.body.addressId); res.status(result.created ? 201 : 200).json({ status: 'success', data: { order: result.order } }); });
+const list = (admin = false, history = false) => catchAsync(async (req, res) => { const base = { ...(!admin ? { user: req.user._id } : {}), ...(history ? { status: { $ne: 'pending' } } : {}) }; const f = new ApiFeatures(Order.find(base), req.query).filter().sort().limitFields().paginate(); if (admin)
+    f.query.populate('user', 'firstname lastname phonenumber'); res.json({
+    status: 'success', data: { orders: await f.query }, pagination: {
+        page: f.page, limit: f.limit, total: await Order.countDocuments({ ...f.filterObject, ...base })
+    }
+}); });
+const get = admin => catchAsync(async (req, res) => { const order = await Order.findOne({ _id: req.params.orderId, ...(!admin ? { user: req.user._id } : {}) }); if (!order)
+    throw new AppError(404, 'سفارش پیدا نشد.'); res.json({ status: 'success', data: { order } }); });
+const cancelOrder = catchAsync(async (req, res) => { const order = await Order.findOneAndUpdate({
+    _id: req.params.orderId, user: req.user._id, status: 'pending', paymentStatus: 'unpaid'
+}, { $set: { status: 'cancelled' } }, { returnDocument: 'after' }); if (!order)
+    throw new AppError(409, 'فقط سفارش پرداخت‌نشده قابل لغو است.'); res.status(204).send(); });
+const updateOrderForAdmin = catchAsync(async (req, res) => {
+    const previous = { shipped: 'confirmed', delivered: 'shipped' }[req.body.status];
+    const order = await Order.findOneAndUpdate({
+        _id: req.params.orderId, status: previous, paymentStatus: 'paid'
+    }, { $set: { status: req.body.status, [req.body.status==='shipped'?'shippedAt':'deliveredAt']:new Date(), ...(req.body.trackingCode ? { trackingCode: req.body.trackingCode } : {}) } }, { returnDocument: 'after', runValidators: true });
+    if (!order)
+        throw new AppError(409, 'تغییر وضعیت مجاز نیست؛ ارسال فقط پس از تأیید پرداخت و تحویل فقط پس از ارسال ممکن است.');
+    res.json({ status: 'success', data: { order } });
+});
+const confirmReceived = catchAsync(async (req,res) => {
+    const order = await Order.findOneAndUpdate({_id:req.params.orderId,user:req.user._id,status:{$in:['shipped','delivered']},paymentStatus:'paid',customerReceivedAt:null},{$set:{customerReceivedAt:new Date()}},{returnDocument:'after'});
+    if(!order) {
+        const existing=await Order.findOne({_id:req.params.orderId,user:req.user._id});
+        if(existing?.customerReceivedAt) return res.json({status:'success',data:{order:existing}});
+        throw new AppError(409,'تأیید دریافت فقط برای سفارش پرداخت‌شده و ارسال‌شده ممکن است.');
+    }
+    res.json({status:'success',data:{order}});
+});
+module.exports = {
+    confirmReceived,
+    prepareOrder, getMyOrders: list(), getMyOrderHistory: list(false, true), getAllOrders: list(true), getMyOrder: get(false), getOrderForAdmin: get(true), cancelOrder, updateOrderForAdmin
+};

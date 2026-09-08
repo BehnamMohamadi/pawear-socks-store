@@ -1,0 +1,150 @@
+/* Compact editorial rhythm. Specificity keeps this layer above page styles. */
+body .header-inner>.wordmark{font-size:36px}body .announcement{height:27px;font-size:10px}body .desktop-nav{font-size:12px;gap:22px}
+body .product-card__visual{aspect-ratio:1/1.08}body .product-card__body{padding-top:12px}body .product-card .price{font-size:13px}body .product-card__meta,body .product-card__soon{font-size:11px}
+body .footer-top{padding-block:40px;gap:26px}body .footer-story .wordmark{font-size:39px;margin-bottom:14px}body .footer-story p,body .footer-links{font-size:12px}body .footer-manifesto p{font-size:19px}body .footer-bottom{padding-block:16px;font-size:11px}
+body .product-info h1{font-size:29px}body .product-price-row strong{font-size:21px}body .product-gallery__main{aspect-ratio:1/1.08}body .product-gallery{top:96px}body .product-detail{gap:34px}
+body .box-hero__copy{padding:38px 30px}body .box-hero h1{font-size:34px}body .box-hero p{font-size:14px}body .box-selection{padding-top:48px}
+body .shop-head{padding-bottom:24px;margin-bottom:26px}body .shop-head p{font-size:13px}body .shop-layout{gap:30px}
+.order-layout>.tracking-panel:first-child{grid-column:1/-1}.tracking-panel .btn{margin-top:12px}
+:root:root{--container:1200px;--header-height:72px;--page-x:20px;--paper:#f8f5f0;--surface-soft:#eee8e1;--line:#ded6ce}
+html body{font-size:14px;line-height:1.85}
+body h1{font-size:clamp(26px,3vw,40px)}body h2{font-size:clamp(22px,2.2vw,29px)}
+body .section{padding-block:48px}body .section-head{margin-bottom:22px}
+body .page-shell{padding-block:30px 60px}body .btn{min-height:44px;padding:10px 19px;font-size:13px}
+body .wordmark{font-size:36px}body .wordmark small{font-size:8px;margin-top:6px}
+body .campaign{margin:12px auto 0;width:calc(100% - 24px);max-width:1376px}
+body .campaign__slides{height:510px}body .campaign-slide h1,body .campaign-slide h2{font-size:32px;line-height:1.5}
+body .campaign-slide p{font-size:13px;margin:12px 0 20px;max-width:340px}
+body .campaign-slide__copy{top:47%}body .campaign-controls{padding:14px 24px;gap:12px}
+body .campaign-slide .btn{min-height:44px;padding:10px 20px;font-size:12px}
+body .campaign-eyebrow{font-size:9px;margin-bottom:12px}
+body .intro-line{padding-block:18px}body .intro-line p{font-size:12px}
+body .category-tile{aspect-ratio:1.12}body .category-tile h3{font-size:21px}
+body .box-story__copy h2{font-size:29px}body .box-story__copy p{font-size:14px;margin-block:16px 22px}
+body .box-story__image img{aspect-ratio:1.4}body .brand-note{padding:48px 20px}
+body .brand-note h2{font-size:28px}body .brand-note p{font-size:13px;margin-block:14px 22px}
+body .product-card h3{font-size:15px}body .product-grid{gap:24px 16px}
+body .auth-content{max-width:350px;padding-block:30px}body .auth-content h1{font-size:29px}
+body .auth-top .wordmark{font-size:35px}body .auth-visual h2{font-size:32px}
+body .auth-submit{min-height:46px}body .auth-pane{padding:26px}
+body .auth-visual{margin:12px 0 12px 12px;min-height:calc(100svh - 24px)}
+body .auth-visual__copy{bottom:44px;right:38px}body .auth-tabs button{font-size:13px}
+body .auth-content input{font-size:14px}
+.order-heading{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:26px;flex-wrap:wrap}
+.order-heading p{margin-top:8px}.order-layout{display:grid;gap:22px;align-items:start}
+.tracking-panel,.order-card{background:#fffdf9;border:1px solid var(--line);padding:24px;border-radius:8px}
+.order-card{display:block;margin-bottom:12px;transition:transform .25s,border-color .25s}
+.order-card:hover{transform:translateY(-3px);border-color:var(--copper)}
+.order-card-top,.order-card-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.order-card-bottom{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:12px}
+.order-status{font-size:11px;border-radius:30px;background:#eee5dc;color:#684932;padding:5px 12px;display:inline-block}
+.order-status[data-status=delivered],.order-status[data-status=paid]{background:#e6ede3;color:#315a3b}
+.order-status[data-status=shipped],.order-status[data-status=confirmed]{background:#e9e5ee;color:#573d68}
+.order-status[data-status=failed],.order-status[data-status=cancelled],.order-status[data-status=expired]{background:#f5e4e1;color:#933c35}
+.order-timeline{display:grid;grid-template-columns:repeat(4,1fr);padding:30px 0;margin:0;list-style:none}
+.order-timeline li{position:relative;text-align:center;font-size:11px;color:#91877f;padding-top:34px}
+.order-timeline li:before{content:'';position:absolute;top:7px;right:0;width:100%;height:1px;background:var(--line)}
+.order-timeline li:after{content:'';position:absolute;top:0;right:calc(50% - 8px);width:16px;height:16px;border-radius:50%;background:#fff;border:1px solid var(--line)}
+.order-timeline li.done{color:var(--accent-dark)}.order-timeline li.done:after{background:var(--accent-dark);border:4px solid #e4d6cc}
+.order-facts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:20px 0 0}
+.order-facts dt{font-size:11px;color:var(--muted)}.order-facts dd{margin:4px 0 0;overflow-wrap:anywhere;font-size:13px}
+.order-facts .wide{grid-column:1/-1}.order-item{display:flex;align-items:center;gap:16px;padding:18px 0;border-bottom:1px solid var(--line)}
+.order-item img{width:64px;height:76px;object-fit:cover;border-radius:4px}.order-item>div{flex:1}.order-item h3{font-size:14px}.order-item p{font-size:12px}
+.order-totals{display:grid;gap:12px;margin-top:24px}.order-totals>div{display:flex;justify-content:space-between;gap:20px}
+.order-totals>div:last-child{border-top:1px solid var(--line);padding-top:14px;font-weight:600}
+.tracking-code{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;background:var(--surface-soft);margin-top:20px;border-radius:4px;flex-wrap:wrap}
+.live-note{font-size:11px;color:var(--muted);display:block;margin-top:14px}.live-note:before{content:'';display:inline-block;width:6px;height:6px;background:#81916a;border-radius:50%;margin-inline-end:7px}
+.account-intro{padding:28px;background:#33252b;color:#f4eae1;border-radius:8px}.account-intro p{color:#c5b5b8;margin:12px 0 22px}.account-intro .btn{color:#f4eae1}
+.password-setup{max-width:420px;margin:12vh auto;padding:32px;background:#fffdf9;border:1px solid var(--line);border-radius:8px}.password-setup h1{font-size:27px;margin-top:30px}.password-setup p{margin:14px 0 24px}.password-setup .btn{margin-top:14px;width:100%}
+@media(min-width:480px){:root:root{--page-x:24px}body .campaign__slides{height:530px}}
+@media(min-width:768px){:root:root{--page-x:32px}body .campaign__slides{height:420px}body .campaign-slide__copy{top:50%;right:5%;width:43%}body .campaign-slide h1,body .campaign-slide h2{font-size:37px}body .category-tile{aspect-ratio:1.03}body .box-story__grid{gap:40px}body .section{padding-block:56px}.order-layout{grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr)}body .auth-pane{padding:30px 42px}}
+@media(min-width:1024px){:root:root{--header-height:76px;--page-x:40px}body .campaign__slides{height:450px}body .campaign-slide h1,body .campaign-slide h2{font-size:42px}body .campaign-controls{padding:15px 5%}body .campaign{width:calc(100% - 40px)}body .home-product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}body .auth-layout{grid-template-columns:1.1fr 1fr}}
+@media(min-width:1440px){:root:root{--container:1240px;--page-x:48px}body .campaign__slides{height:480px}body .campaign-slide h1,body .campaign-slide h2{font-size:46px}}
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:page-out .18s ease both}
+::view-transition-new(root){animation:page-in .35s cubic-bezier(.2,.7,.2,1) both}
+@keyframes page-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes page-out{to{opacity:0;transform:translateY(-5px)}}
+main{animation:page-in .45s ease both}
+.reveal-ready{opacity:0;transform:translateY(18px);transition:opacity .65s ease var(--reveal-delay,0s),transform .65s cubic-bezier(.2,.7,.2,1) var(--reveal-delay,0s)}
+.reveal-ready.is-revealed{opacity:1;transform:none}
+html:after{content:'';position:fixed;z-index:9999;top:0;right:0;width:0;height:2px;background:#ad856a;transition:width .6s ease}
+html.is-navigating:after{width:85%}
+@media(prefers-reduced-motion:reduce){.reveal-ready{opacity:1;transform:none}main{animation:none}::view-transition-old(root),::view-transition-new(root){animation:none}}
+
+/* September 9: scale through layout dimensions, never browser zoom. */
+html{scrollbar-gutter:stable}
+:root:root{--header-height:60px;--container:1080px}
+body .header-inner{height:60px;max-width:1280px;gap:20px}
+body .header-inner>.wordmark{font-size:30px;letter-spacing:-1.8px}
+body .header-inner>.wordmark small{display:none}
+body .header-actions{gap:3px}
+body .header-actions .icon-btn{width:36px;height:38px;padding:9px;border-radius:50%}
+body .header-actions .icon-btn:hover{background:#eee7df}
+body .header-actions .icon{width:18px;height:18px}
+body .desktop-nav{gap:24px;font-size:12px}
+body .site-header{background:#faf8f4f5}
+body .page-shell{padding-block:24px 48px}
+body h1{font-size:clamp(24px,2.1vw,30px)}
+body h2{font-size:clamp(20px,1.8vw,24px)}
+body .section{padding-block:38px}
+body .breadcrumb{margin-bottom:20px;font-size:11px}
+body .campaign__slides{height:470px}
+body .campaign-slide h1,body .campaign-slide h2{font-size:30px}
+body .box-hero{position:relative;grid-template-columns:1fr;min-height:0}
+body .box-hero>img{height:150px;min-height:0;width:100%;aspect-ratio:auto;object-fit:cover;object-position:30% 45%}
+body .box-hero__copy{padding:22px 24px}
+body .box-hero h1{font-size:25px;line-height:1.6}
+body .box-hero p{font-size:12px;margin:10px 0 14px}
+body .box-hero .eyebrow{font-size:9px;margin-bottom:8px}
+body .box-hero__note{font-size:11px}
+.box-browse{display:inline-block;font-size:12px;border-bottom:1px solid #bd9e8d;margin-top:14px;padding-bottom:3px}
+body .box-selection{padding-top:28px}
+body .box-selection .section-head{margin-bottom:18px}
+body .box-selection h2{font-size:23px}
+body .product-card h3{font-size:13px}
+body .product-card__visual{aspect-ratio:1/1.05}
+body .product-card__heart{height:32px;width:32px;top:9px;left:9px}
+[data-wishlist][aria-pressed=true]{color:#873b53}
+[data-wishlist][aria-pressed=true] svg{fill:currentColor}
+[data-wishlist] svg{transition:fill .2s,color .2s,transform .2s}
+[data-wishlist]:active svg{transform:scale(.85)}
+body .product-gallery__main{max-height:480px}
+body .account-page{min-height:70vh}
+body .account-page .order-heading{margin-bottom:20px}
+body .account-page h1{font-size:28px}
+body .account-page h2{font-size:20px}
+body .account-layout{gap:24px}
+body .account-intro{background:#fffdf9;color:var(--ink);border:1px solid var(--line);padding:22px;text-align:center}
+body .account-intro .eyebrow{display:none}
+body .account-intro p{color:var(--muted);font-size:12px;margin:8px 0 20px}
+body .account-intro .btn{display:flex;width:100%;margin-top:8px;color:var(--ink);min-height:40px;font-size:12px}
+body .account-intro [data-logout]{border:0;color:#8e4653}
+.account-avatar{width:48px;height:48px;background:#eee1d7;color:#775044;display:grid;place-items:center;border-radius:50%;font-size:22px;margin:0 auto 12px}
+body .account-page .order-card{padding:18px;margin-bottom:12px}
+body .account-page .order-card-top strong{font-size:12px;overflow-wrap:anywhere}
+.account-order-items{display:flex;gap:10px;align-items:center;margin-top:16px}
+.account-order-items img{width:44px;height:52px;object-fit:cover;border-radius:4px}
+.account-order-items p{font-size:12px}
+@media(min-width:480px){body .campaign__slides{height:490px}}
+@media(min-width:768px){
+ body .campaign__slides{height:350px}
+ body .campaign-slide h1,body .campaign-slide h2{font-size:34px}
+ body .box-hero{grid-template-columns:1.2fr 1fr;height:248px}
+ body .box-hero>img{grid-row:auto;height:248px}
+ body .box-hero__copy{padding:22px 30px;align-self:center}
+ body .box-hero h1 br{display:none}
+ body .account-layout{grid-template-columns:minmax(0,1fr) 250px}
+ body .account-intro{position:sticky;top:84px}
+}
+@media(min-width:1024px){
+ body .home-product-grid,body .wishlist-grid,body .box-selection .product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ body .shop-layout{grid-template-columns:170px minmax(0,1fr)}
+ body .shop-product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 16px}
+ body .campaign{max-width:1220px}
+}
+@media(min-width:1440px){
+ :root:root{--container:1120px;--page-x:36px}
+ body .campaign__slides{height:380px}
+ body .campaign-slide h1,body .campaign-slide h2{font-size:38px}
+}
