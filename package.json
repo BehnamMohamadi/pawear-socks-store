@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon app.js",
+    "dev:local": "npm run db:local && npm run dev",
     "start": "node app.js",
     "test": "node scripts/test-backend.js",
     "check": "node scripts/check.js",

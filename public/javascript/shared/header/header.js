@@ -1,4 +1,5 @@
 (() => {
+ document.querySelectorAll('.desktop-nav a,.mobile-menu nav a').forEach(link=>{const target=new URL(link.href,location.href);if(target.pathname===location.pathname&&target.search===location.search)link.setAttribute('aria-current','page');});
  const searchButton=document.querySelector('.header-search-toggle'),search=document.querySelector('[data-search-panel]');
  const menuButton=document.querySelector('.menu-toggle'),menu=document.querySelector('[data-mobile-menu]');
  const closeSearch=()=>{if(!search)return;search.hidden=true;searchButton?.setAttribute('aria-expanded','false');};

@@ -1,0 +1,17 @@
+{
+  "reference": "User-provided ChatGPT Image Sep 7, 2026, 09_06_13 PM.png",
+  "assets": [
+    {
+      "file": "public/images/pawear-reference/hero-v1.webp",
+      "prompt": "Create a photorealistic premium Persian socks e-commerce HERO BACKGROUND, very wide landscape aspect ratio 2.7:1, 1920x720 composition. No webpage UI, no text, no banners, no watermarks. Low-angle close-up of an adult athlete's LOWER LEGS ONLY, black cuffed joggers, white ribbed crew socks with two lime green stripes and a tiny black P. embroidered mark, modern grey black and white running sneakers with neon lime accents, standing on rough concrete urban stairs. Shoes and socks occupy RIGHT 60% of image and remain fully in frame. LEFT 35% is very dark uncluttered out-of-focus city architecture, reserved for live HTML text. Moody cinematic black and charcoal city background with a subtle diagonal lime light line. Sharp realistic sock knit, grey stone texture. Premium sportswear campaign photography, natural anatomy. No recognizable third-party shoe brand or logos. This is an independent clean photo asset for PAWEAR black-white-neon-green brand."
+    },
+    {
+      "file": "public/images/pawear-reference/women-v1.webp",
+      "prompt": "Photorealistic premium sock store category photograph, horizontal 4:3 ratio. Close crop of an adult woman's LOWER LEGS ONLY from mid calves down, black trousers cuffs, clean white ribbed socks with very small black P. embroidery and light pink suede sneakers. Feet casually crossed on a seamless dusty pink studio backdrop and floor. Natural light, crisp textile details, sophisticated commercial product photography. No text, no UI, no border, no recognizable third-party shoe brand. Leave lower quarter relatively uncluttered for an HTML caption. Both feet anatomically correct, clearly visible, modest and neutral retail photograph."
+    },
+    {
+      "file": "public/images/pawear-reference/kids-v1.webp",
+      "prompt": "Photorealistic premium children's sock store category photograph, horizontal 4:3 ratio. A child's LOWER LEGS ONLY from below knees down, wearing clean ivory white ribbed crew socks with a small yellow smiley circle patch on each outer ankle, no shoes, standing naturally side by side on a pale beige studio floor, soft neutral beige backdrop. Modest ordinary retail catalog photography, soft natural lighting, true knit texture, normal anatomically correct feet. Crop excludes face and body. No text, no UI, no border. Feet centered with space around edges, lower quarter available for HTML caption."
+    }
+  ]
+}

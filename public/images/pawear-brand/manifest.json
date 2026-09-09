@@ -1,0 +1,79 @@
+[
+  {
+    "source": "01_logo_dark.png",
+    "asset": "/images/pawear-brand/01_logo_dark.webp",
+    "width": 506,
+    "height": 317,
+    "bytes": 13252
+  },
+  {
+    "source": "02_logo_light.png",
+    "asset": "/images/pawear-brand/02_logo_light.webp",
+    "width": 506,
+    "height": 256,
+    "bytes": 9430
+  },
+  {
+    "source": "05_PW_dark.png",
+    "asset": "/images/pawear-brand/05_PW_dark.webp",
+    "width": 168,
+    "height": 164,
+    "bytes": 3474
+  },
+  {
+    "source": "06_PW_light.png",
+    "asset": "/images/pawear-brand/06_PW_light.webp",
+    "width": 169,
+    "height": 164,
+    "bytes": 3070
+  },
+  {
+    "source": "07_PW_green.png",
+    "asset": "/images/pawear-brand/07_PW_green.webp",
+    "width": 169,
+    "height": 164,
+    "bytes": 3848
+  },
+  {
+    "source": "08_lifestyle_sock.png",
+    "asset": "/images/pawear-brand/08_lifestyle_sock.webp",
+    "width": 507,
+    "height": 716,
+    "bytes": 62136
+  },
+  {
+    "source": "09_woven_label.png",
+    "asset": "/images/pawear-brand/09_woven_label.webp",
+    "width": 523,
+    "height": 368,
+    "bytes": 51556
+  },
+  {
+    "source": "10_packaging.png",
+    "asset": "/images/pawear-brand/10_packaging.webp",
+    "width": 523,
+    "height": 348,
+    "bytes": 18742
+  },
+  {
+    "source": "11_sock_bundle.png",
+    "asset": "/images/pawear-brand/11_sock_bundle.webp",
+    "width": 400,
+    "height": 308,
+    "bytes": 26516
+  },
+  {
+    "source": "12_hang_tag.png",
+    "asset": "/images/pawear-brand/12_hang_tag.webp",
+    "width": 230,
+    "height": 308,
+    "bytes": 11970
+  },
+  {
+    "source": "13_PW_on_sock.png",
+    "asset": "/images/pawear-brand/13_PW_on_sock.webp",
+    "width": 400,
+    "height": 308,
+    "bytes": 21272
+  }
+]

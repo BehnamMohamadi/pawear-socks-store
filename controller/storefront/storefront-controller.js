@@ -10,7 +10,7 @@ const { AppError } = require('../../utils/app-error');
 const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const seo = (res, path, description, noindex = false, jsonld = null) => { res.locals.seo = { canonical: res.locals.siteUrl + path, description, noindex: noindex || process.env.NODE_ENV !== 'production', jsonld }; };
 exports.home = async (req, res) => {
-  const products = (await Product.find({ isActive: true }).sort('-isFeatured -createdAt').limit(5).lean()).map(p => present(p));
+  const products = (await Product.find({ isActive: true }).sort('-isFeatured -createdAt').limit(6).lean()).map(p => present(p));
   seo(res, '/', 'پاور؛ فروشگاه جوراب فری‌سایز و باکس‌های آماده جوراب. قدرت در قدم‌های کوچک است.');
   res.render('pages/home/home', { title: 'خرید جوراب و باکس جوراب | پاور PAWEAR', products });
 };

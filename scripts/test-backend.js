@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const net=require('node:net');
 const {MongoClient}=require('mongodb');
-const run=env=>new Promise(resolve=>{const p=spawn(process.execPath,['--test','tests/backend.test.js','tests/frontend.test.js','tests/lifecycle.test.js'],{stdio:'inherit',env});p.on('error',()=>resolve(1));p.on('exit',code=>resolve(code??1));});
+const run=env=>new Promise(resolve=>{const p=spawn(process.execPath,['--test','tests/backend.test.js','tests/frontend.test.js','tests/lifecycle.test.js','tests/wishlist.test.js'],{stdio:'inherit',env});p.on('error',()=>resolve(1));p.on('exit',code=>resolve(code??1));});
 (async()=>{
  if(process.env.TEST_MONGODB_URI){process.exitCode=await run(process.env);return;}
  const root=path.resolve(__dirname,'../artifacts');fs.mkdirSync(root,{recursive:true});const dir=fs.mkdtempSync(path.join(root,'test-mongo-'));
