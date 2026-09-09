@@ -1,0 +1,10 @@
+const router=require('express').Router();
+const c=require('../../../controller/product-controllers/brand-controller');
+const {protect,restrictTo}=require('../../../middleware/auth-middleware');
+const {validate}=require('../../../middleware/validate');
+const {validateParam}=require('../../../middleware/validate-param');
+const v=require('../../../validation/product-validations/brand-validation');
+router.get('/',protect,restrictTo('admin'),c.getAllBrands);
+router.post('/',protect,restrictTo('admin'),validate(v.createBrandSchema),c.addBrand);
+router.route('/:brandId').patch(protect,restrictTo('admin'),validateParam('brandId',v.brandIdSchema),validate(v.editBrandSchema),c.editBrand).delete(protect,restrictTo('admin'),validateParam('brandId',v.brandIdSchema),c.deleteBrand);
+module.exports=router;

@@ -1,130 +1,15 @@
-const express = require("express");
-
-const {
-  getAllProducts,
-  getProductById,
-  getProductBySlug,
-
-  addProduct,
-  editProductById,
-  deleteProductById,
-
-  updateProductCover,
-  deleteProductCover,
-
-  uploadProductImages,
-  replaceProductImages,
-} = require("../../../controller/product-controllers/product-controller");
-
-const {
-  getAllProductsForAdmin,
-  getProductByIdForAdmin,
-} = require("../../../controller/product-controllers/admin-catalog-controller");
-
-const { protect, restrictTo } = require("../../../middleware/auth-middleware");
-
-const { validate } = require("../../../middleware/validate");
-const { validateParam } = require("../../../middleware/validate-param");
-
-const { uploadImage } = require("../../../middleware/upload-image");
-
-const {
-  productIdSchema,
-  createProductSchema,
-  editProductSchema,
-} = require("../../../validation/product-validations/product-validation");
-
-const router = express.Router();
-const catalogImages = require('../../../controller/product-controllers/catalog-images-controller');
-const Joi = require('joi');
-router.post('/:productId/gallery', protect, restrictTo('admin'), validateParam('productId', productIdSchema), uploadImage.array('images', 10), catalogImages.uploadCatalogImages('Product'));
-router.put('/:productId/gallery', protect, restrictTo('admin'), validateParam('productId', productIdSchema), validate(Joi.object({ images: Joi.array().max(10).unique().items(Joi.string()).required(), coverImage: Joi.string() }).unknown(false)), catalogImages.editCatalogImages('Product'));
-
-// =========================
-// ADMIN READ ROUTES
-// Must stay before dynamic public/admin routes.
-// =========================
-
-router.get("/all", protect, restrictTo("admin"), getAllProductsForAdmin);
-
-router.get(
-  "/admin/:productId",
-  protect,
-  restrictTo("admin"),
-  validateParam("productId", productIdSchema),
-  getProductByIdForAdmin,
-);
-
-// =========================
-// PUBLIC ROUTES
-// =========================
-
-router.get("/", getAllProducts);
-
-router.get("/id/:productId", validateParam("productId", productIdSchema), getProductById);
-
-router.get("/slug/:slug", getProductBySlug);
-
-// =========================
-// ADMIN WRITE ROUTES
-// =========================
-
-router.post("/", protect, restrictTo("admin"), validate(createProductSchema), addProduct);
-
-// Cover Image
-router.patch(
-  "/edit-cover/:productId",
-  protect,
-  restrictTo("admin"),
-  validateParam("productId", productIdSchema),
-  uploadImage.single("coverImage"),
-  updateProductCover,
-);
-
-router.delete(
-  "/delete-cover/:productId",
-  protect,
-  restrictTo("admin"),
-  validateParam("productId", productIdSchema),
-  deleteProductCover,
-);
-
-// Gallery Upload
-router.post(
-  "/images/upload/:productId",
-  protect,
-  restrictTo("admin"),
-  validateParam("productId", productIdSchema),
-  uploadImage.array("images", 10),
-  uploadProductImages,
-);
-
-// Replace Gallery State
-router.put(
-  "/images/:productId",
-  protect,
-  restrictTo("admin"),
-  validateParam("productId", productIdSchema),
-  uploadImage.array("images", 10),
-  replaceProductImages,
-);
-
-// Product CRUD
-router.patch(
-  "/:productId",
-  protect,
-  restrictTo("admin"),
-  validateParam("productId", productIdSchema),
-  validate(editProductSchema),
-  editProductById,
-);
-
-router.delete(
-  "/:productId",
-  protect,
-  restrictTo("admin"),
-  validateParam("productId", productIdSchema),
-  deleteProductById,
-);
-
-module.exports = router;
+const express=require('express');
+const base=require('../../../controller/product-controllers/product-controller');
+const variant=require('../../../controller/product-controllers/product-variant-controller');
+const {getAllProductsForAdmin,getProductByIdForAdmin}=require('../../../controller/product-controllers/admin-catalog-controller');
+const {protect,restrictTo}=require('../../../middleware/auth-middleware');const {validate}=require('../../../middleware/validate');const {validateParam}=require('../../../middleware/validate-param');const {uploadImage}=require('../../../middleware/upload-image');
+const {productIdSchema,createProductSchema,editProductSchema}=require('../../../validation/product-validations/product-validation');
+const router=express.Router();const catalogImages=require('../../../controller/product-controllers/catalog-images-controller');const Joi=require('joi');
+router.post('/:productId/gallery',protect,restrictTo('admin'),validateParam('productId',productIdSchema),uploadImage.array('images',10),catalogImages.uploadCatalogImages('Product'));
+router.put('/:productId/gallery',protect,restrictTo('admin'),validateParam('productId',productIdSchema),validate(Joi.object({images:Joi.array().max(10).unique().items(Joi.string()).required(),coverImage:Joi.string()}).unknown(false)),catalogImages.editCatalogImages('Product'));
+router.get('/all',protect,restrictTo('admin'),getAllProductsForAdmin);router.get('/admin/:productId',protect,restrictTo('admin'),validateParam('productId',productIdSchema),getProductByIdForAdmin);
+router.get('/',base.getAllProducts);router.get('/id/:productId',validateParam('productId',productIdSchema),base.getProductById);router.get('/slug/:slug',base.getProductBySlug);
+router.post('/',protect,restrictTo('admin'),validate(createProductSchema),variant.addProduct);
+router.patch('/edit-cover/:productId',protect,restrictTo('admin'),validateParam('productId',productIdSchema),uploadImage.single('coverImage'),base.updateProductCover);router.delete('/delete-cover/:productId',protect,restrictTo('admin'),validateParam('productId',productIdSchema),base.deleteProductCover);
+router.post('/images/upload/:productId',protect,restrictTo('admin'),validateParam('productId',productIdSchema),uploadImage.array('images',10),base.uploadProductImages);router.put('/images/:productId',protect,restrictTo('admin'),validateParam('productId',productIdSchema),uploadImage.array('images',10),base.replaceProductImages);
+router.patch('/:productId',protect,restrictTo('admin'),validateParam('productId',productIdSchema),validate(editProductSchema),variant.editProductById);router.delete('/:productId',protect,restrictTo('admin'),validateParam('productId',productIdSchema),base.deleteProductById);module.exports=router;

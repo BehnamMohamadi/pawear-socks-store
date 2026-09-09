@@ -1,7 +1,1 @@
-const Joi = require('joi');
-const id = Joi.string().hex().length(24).required();
-module.exports = {
-    addCartItemSchema: Joi.object({
-        itemType: Joi.string().valid('Product', 'Box').required(), item: id, size:Joi.string().trim().min(1).max(30), quantity: Joi.number().integer().min(1).max(100).default(1)
-    }).unknown(false), updateCartItemSchema: Joi.object({ quantity: Joi.number().integer().min(1).max(100).required() }).unknown(false), cartItemIdSchema: id
-};
+const Joi=require('joi');const id=Joi.string().hex().length(24).required();module.exports={addCartItemSchema:Joi.object({itemType:Joi.string().valid('Product','Box').required(),item:id,variantId:Joi.string().hex().length(24),size:Joi.string().trim().min(1).max(30),color:Joi.string().trim().max(60).allow(''),quantity:Joi.number().integer().min(1).max(100).default(1)}).unknown(false),updateCartItemSchema:Joi.object({quantity:Joi.number().integer().min(0).max(100).required()}).unknown(false),cartItemIdSchema:id};
