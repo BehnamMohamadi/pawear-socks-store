@@ -15,9 +15,10 @@ const gatewayName = () => { const name = process.env.PAYMENT_GATEWAY || 'mock'; 
 // stock is available-to-sell. Reservation and payment/order writes share one transaction.
 const takeStock = async (order, session) => {
     for (const item of order.inventory) {
-        const r = await Product.updateOne({
-            _id: item.product, isActive: true, stock: { $gte: item.quantity }
-        }, { $inc: { stock: -item.quantity, __v: 1 } }, { session });
+        const sized=item.size&&item.size!=='free-size';
+        const filter=sized?{_id:item.product,isActive:true,sizes:{$elemMatch:{label:item.size,isActive:true,stock:{$gte:item.quantity}}}}:{_id:item.product,isActive:true,'sizes.0':{$exists:false},stock:{$gte:item.quantity}};
+        const increments=sized?{'sizes.$.stock':-item.quantity,stock:-item.quantity,__v:1}:{stock:-item.quantity,__v:1};
+        const r=await Product.updateOne(filter,{$inc:increments},{session});
         if (r.modifiedCount !== 1)
             throw new AppError(409, 'موجودی یکی از جوراب‌ها کافی نیست.', null, 'INSUFFICIENT_STOCK');
     }
@@ -26,7 +27,7 @@ const releaseStock = async (order, session) => {
     if (order.stockState !== 'reserved')
         return;
     for (const item of order.inventory)
-        await Product.updateOne({ _id: item.product }, { $inc: { stock: item.quantity, __v: 1 } }, { session });
+        await Product.updateOne(item.size&&item.size!=='free-size'?{_id:item.product,'sizes.label':item.size}:{_id:item.product},{$inc:item.size&&item.size!=='free-size'?{'sizes.$.stock':item.quantity,stock:item.quantity,__v:1}:{stock:item.quantity,__v:1}},{session});
     order.stockState = 'released';
 };
 const closeUnpaid = async (paymentId, status, reason) => transaction(async (session) => {
@@ -76,7 +77,7 @@ const startPayment = async ({ user, orderId }) => {
         const current = await buildCartSnapshot(cart, session);
         const signature = items => JSON.stringify(items.map(i => ({
             type: i.itemType, id: String(i.item), quantity: i.quantity, price: i.unitPrice, discount: i.discount, components: i.components.map(c => ({
-                id: String(c.product), quantity: c.quantity, price: c.unitPrice
+                id: String(c.product), size:c.size||'free-size', quantity: c.quantity, price: c.unitPrice
             }))
         })));
         if (signature(current.items) !== signature(order.items))

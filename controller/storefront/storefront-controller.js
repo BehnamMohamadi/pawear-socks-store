@@ -11,7 +11,7 @@ const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const seo = (res, path, description, noindex = false, jsonld = null) => { res.locals.seo = { canonical: res.locals.siteUrl + path, description, noindex: noindex || process.env.NODE_ENV !== 'production', jsonld }; };
 exports.home = async (req, res) => {
   const products = (await Product.find({ isActive: true }).sort('-isFeatured -createdAt').limit(6).lean()).map(p => present(p));
-  seo(res, '/', 'پاور؛ فروشگاه جوراب فری‌سایز و باکس‌های آماده جوراب. قدرت در قدم‌های کوچک است.');
+  seo(res, '/', 'پاور؛ فروشگاه جوراب در سایزهای متنوع و باکس‌های آماده جوراب. قدرت در قدم‌های کوچک است.');
   res.render('pages/home/home', { title: 'خرید جوراب و باکس جوراب | پاور PAWEAR', products });
 };
 exports.shop = async (req, res) => {
@@ -25,7 +25,7 @@ exports.shop = async (req, res) => {
   const sort = { newest: '-createdAt', cheap: 'price', expensive: '-price' }[req.query.sort] || '-createdAt';
   const [rows, total, categories] = await Promise.all([Product.find(filter).sort(sort).skip((page - 1) * 24).limit(24).lean(), Product.countDocuments(filter), Category.find({ isActive: true }).sort('sortOrder').lean()]);
   if (page > 1 && !rows.length) throw new AppError(404, 'صفحه پیدا نشد.');
-  seo(res, '/shop' + (page > 1 ? '?page=' + page : ''), 'خرید جوراب تکی فری‌سایز از پاور؛ قیمت و موجودی به‌روز.', Object.keys(req.query).some(k => k !== 'page'));
+  seo(res, '/shop' + (page > 1 ? '?page=' + page : ''), 'خرید جوراب تکی با انتخاب سایز از پاور؛ قیمت و موجودی به‌روز.', Object.keys(req.query).some(k => k !== 'page'));
   const pageUrl = n => '/shop?' + new URLSearchParams({ ...Object.fromEntries(Object.entries(req.query).filter(([, v]) => typeof v === 'string')), page: n }).toString();
   res.render('pages/shop/shop', { title: 'فروشگاه جوراب' + (page > 1 ? ' ـ صفحه ' + page : '') + ' | پاور', products: rows.map(p => present(p)), total, page, totalPages: Math.ceil(total / 24), categories, q, filters: req.query, pageUrl });
 };
@@ -35,11 +35,14 @@ exports.product = type => async (req, res) => {
   const record = await model.findOne({ slug: req.params.slug, isActive: true }).lean();
   if (!record) throw new AppError(404, 'این کالا پیدا نشد.');
   let sellable;
-  try { sellable = await getSellable(type, record._id); }
+  try { sellable = type==='Product'?{}:await getSellable(type, record._id); }
   catch (e) { if (!e.isOperational) throw e; throw new AppError(404, 'این کالا فعلاً عرضه نمی‌شود.'); }
   const product = present(record, type, sellable);
   const description = record.description || `${record.name}، ${product.meta} از فروشگاه پاور.`;
   const jsonld = { '@context': 'https://schema.org', '@type': 'Product', name: record.name, sku: record.sku, description, image: new URL(record.coverImage, res.locals.siteUrl).href, brand: { '@type': 'Brand', name: record.brand || 'PAWEAR' }, offers: { '@type': 'Offer', url: res.locals.siteUrl + product.url, priceCurrency: 'IRR', price: product.price * 10, availability: 'https://schema.org/' + (product.stock > 0 ? 'InStock' : 'OutOfStock'), itemCondition: 'https://schema.org/NewCondition' } };
+  if(type==='Product'&&record.sizes?.length){
+    jsonld.offers=record.sizes.filter(v=>v.isActive).map(v=>({'@type':'Offer',name:record.name+' — '+v.label,url:res.locals.siteUrl+product.url,priceCurrency:'IRR',price:v.price*10,availability:'https://schema.org/'+(v.stock>0?'InStock':'OutOfStock'),itemCondition:'https://schema.org/NewCondition'}));
+  }
   seo(res, product.url, description.slice(0, 170), false, jsonld);
   res.render('pages/product/product', { title: record.name + ' | پاور', product });
 };
@@ -47,10 +50,11 @@ exports.cart = async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id }).lean();
   const cartItems = [];
   for (const i of cart?.items || []) {
-    try { const s = await getSellable(i.itemType, i.item); cartItems.push({ ...present(s.record.toObject(), i.itemType, s), rowId: i._id, qty: i.quantity, available: s.stock >= i.quantity }); }
+    try { const s = await getSellable(i.itemType, i.item, null, i.size); cartItems.push({ ...present(s.record.toObject(), i.itemType, s), rowId: i._id, qty: i.quantity, available: s.stock >= i.quantity }); }
     catch (e) { if (!e.isOperational) throw e; cartItems.push({ rowId: i._id, title: 'کالای غیرفعال؛ لطفاً حذف کنید', image: '/images/product-placeholder.svg', qty: i.quantity, price: 0, meta: '', available: false }); }
   }
-  res.render('pages/cart/cart', { title: 'سبد خرید | پاور', cartItems, subtotal: cartItems.reduce((n, i) => n + i.qty * i.price, 0) });
+  const {shippingAmount}=await require('../../services/shopping-services/shipping-service').quoteShipping(cart?.items||[]);
+  res.render('pages/cart/cart', { title: 'سبد خرید | پاور', cartItems, shippingAmount, subtotal: cartItems.reduce((n, i) => n + i.qty * i.price, 0) });
 };
 exports.wishlist = async (req, res) => {
   const wishlist = await Wishlist.findOne({ user: req.user._id }).populate('items.product').lean();

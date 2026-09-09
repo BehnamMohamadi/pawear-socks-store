@@ -180,6 +180,13 @@ const editProductById = catchAsync(async (req, res, next) => {
     await validateCategoryAndSubCategory(categoryId, subCategoryId);
   }
 
+  if(req.body.sizes!==undefined){
+    const {normalizeSize}=require('../../services/shopping-services/size-service');
+    const labels=req.body.sizes.map(v=>normalizeSize(v.label));
+    if((product.sizes||[]).some(v=>!labels.includes(v.label)))throw new AppError(409,'سایز ثبت‌شده را حذف یا تغییر نام ندهید؛ برای توقف فروش آن را غیرفعال کنید.');
+    if(await require('../../models/shopping-models/order-model').exists({'inventory.product':product._id,$or:[{stockState:'reserved'},{status:'review'}]}))throw new AppError(409,'ابتدا پرداخت‌های در انتظار یا نیازمند بررسی این محصول را تعیین تکلیف کنید؛ سپس موجودی سایزها را ویرایش کنید.');
+    if(!product.sizes?.length&&req.body.sizes.length&&await require('../../models/product-models/box-model').exists({'products.product':product._id}))throw new AppError(409,'این جوراب در باکس استفاده شده؛ ابتدا آن را از ترکیب باکس خارج کنید، سایزها را ثبت و سپس سایز مشخص را به باکس برگردانید.');
+  }
   const allowedFields = [
     "name",
     "sku",
@@ -189,6 +196,7 @@ const editProductById = catchAsync(async (req, res, next) => {
     "price",
     "brand",
     "size",
+    "sizes",
     "details",
     "stock",
     "description",

@@ -1,6 +1,6 @@
 {
   "name": "pawear-store",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "PAWEAR Persian socks store: Express API, admin panel and EJS SSR storefront",
   "main": "app.js",
   "type": "commonjs",

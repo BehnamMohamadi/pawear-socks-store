@@ -7,7 +7,7 @@ require('dotenv').config({path:path.join(__dirname,'../.env'),quiet:true});
  const result=await login.json();
  if(login.status!==200||result.data?.user?.role!=='admin')throw new Error('Configured admin login failed.');
  const cookie=login.headers.get('set-cookie').split(';')[0];
- for(const route of ['/','/admin','/admin/products','/admin/boxes','/admin/categories','/admin/subcategories','/admin/orders','/admin/payments','/admin/users','/admin/carts']){
+ for(const route of ['/','/admin','/admin/products','/admin/boxes','/admin/categories','/admin/subcategories','/admin/orders','/admin/payments','/admin/users','/admin/carts','/admin/settings','/admin/products/new','/admin/orders?stage=packing','/admin/orders?stage=ready']){
   const response=await fetch(base+route,{headers:{Cookie:cookie,Accept:'text/html'}});
   if(response.status!==200)throw new Error('Page failed: '+route);
  }

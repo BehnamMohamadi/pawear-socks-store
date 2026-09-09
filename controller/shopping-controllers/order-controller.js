@@ -17,10 +17,15 @@ const cancelOrder = catchAsync(async (req, res) => { const order = await Order.f
 }, { $set: { status: 'cancelled' } }, { returnDocument: 'after' }); if (!order)
     throw new AppError(409, 'فقط سفارش پرداخت‌نشده قابل لغو است.'); res.status(204).send(); });
 const updateOrderForAdmin = catchAsync(async (req, res) => {
+    if(req.body.status==='packed'){
+        const order=await Order.findOneAndUpdate({_id:req.params.orderId,status:'confirmed',paymentStatus:'paid'},{$set:{packedAt:new Date(),packingNote:req.body.packingNote||''}},{returnDocument:'after',runValidators:true});
+        if(!order)throw new AppError(409,'فقط سفارش پرداخت‌شده و ارسال‌نشده قابل آماده‌سازی است.');
+        return res.json({status:'success',data:{order}});
+    }
     const previous = { shipped: 'confirmed', delivered: 'shipped' }[req.body.status];
     const order = await Order.findOneAndUpdate({
         _id: req.params.orderId, status: previous, paymentStatus: 'paid'
-    }, { $set: { status: req.body.status, [req.body.status==='shipped'?'shippedAt':'deliveredAt']:new Date(), ...(req.body.trackingCode ? { trackingCode: req.body.trackingCode } : {}) } }, { returnDocument: 'after', runValidators: true });
+    }, { $set: { status: req.body.status, [req.body.status==='shipped'?'shippedAt':'deliveredAt']:new Date(), ...(req.body.trackingCode ? { trackingCode: req.body.trackingCode,carrier:req.body.carrier||'پست' } : {}) } }, { returnDocument: 'after', runValidators: true });
     if (!order)
         throw new AppError(409, 'تغییر وضعیت مجاز نیست؛ ارسال فقط پس از تأیید پرداخت و تحویل فقط پس از ارسال ممکن است.');
     res.json({ status: 'success', data: { order } });

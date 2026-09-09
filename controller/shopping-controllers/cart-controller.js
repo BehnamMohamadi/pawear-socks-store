@@ -5,7 +5,7 @@ const { AppError } = require('../../utils/app-error');
 const { catchAsync } = require('../../utils/catch-async');
 const present = async (cart) => { const data = cart ? cart.toObject() : { items: [], revision: 0 }; for (const i of data.items) {
     try {
-        const s = await getSellable(i.itemType, i.item);
+        const s = await getSellable(i.itemType, i.item, null, i.size);
         i.product = {
             ...s.record.toObject(), price: s.price, stock: s.stock, pairCount: s.pairCount
         };
@@ -23,14 +23,14 @@ const present = async (cart) => { const data = cart ? cart.toObject() : { items:
 const mutate = async (userId, fn) => mongoose.connection.transaction(async (session) => { let cart = await Cart.findOne({ user: userId }).session(session); if (!cart)
     cart = new Cart({ user: userId }); await fn(cart, session); cart.revision += 1; await cart.save({ session }); return cart; });
 const getCart = catchAsync(async (req, res) => res.json({ status: 'success', data: { cart: await present(await Cart.findOne({ user: req.user._id })) } }));
-const addCartItem = catchAsync(async (req, res) => { const cart = await mutate(req.user._id, async (cart, session) => { const { itemType, item, quantity } = req.body; const old = cart.items.find(i => i.itemType === itemType && String(i.item).toLowerCase() === item.toLowerCase()); if (old) {
+const addCartItem = catchAsync(async (req, res) => { const cart = await mutate(req.user._id, async (cart, session) => { const { itemType, item, quantity } = req.body; const selected=await getSellable(itemType,item,session,req.body.size); const size=selected.size||'free-size'; const old = cart.items.find(i => i.itemType === itemType && (i.size||'free-size')===size && String(i.item).toLowerCase() === item.toLowerCase()); if (old) {
     old.quantity += quantity;
 }
 else {
     if (cart.items.length >= 100)
         throw new AppError(400, 'حداکثر ۱۰۰ ردیف در سبد مجاز است.');
     cart.items.push({
-        itemType, item, quantity
+        itemType, item, quantity, size
     });
 } await buildCartSnapshot(cart, session); }); res.json({ status: 'success', data: { cart: await present(cart) } }); });
 const updateCartItem = catchAsync(async (req, res) => { const cart = await mutate(req.user._id, async (cart, session) => { const i = cart.items.id(req.params.itemId); if (!i)

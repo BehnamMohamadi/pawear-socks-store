@@ -25,4 +25,7 @@ router.get(
   getAdminDashboard,
 );
 
+const settings=require('../../controller/admin/settings-controller');
+router.get('/settings/shipping',settings.read);
+router.put('/settings/shipping',settings.save);
 module.exports = router;

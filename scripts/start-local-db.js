@@ -3,7 +3,7 @@ const path=require('node:path');
 const {spawn}=require('node:child_process');
 const {MongoClient}=require('mongodb');
 require('dotenv').config({path:path.join(__dirname,'../.env'),quiet:true});
-(async()=>{
+const startLocalDatabase=async()=>{
  if(process.env.NODE_ENV==='production')throw new Error('Local database helper is disabled in production.');
  const target=new URL(process.env.MONGODB_URI);
  if(target.hostname!=='127.0.0.1'||target.port!=='27028'||target.searchParams.get('replicaSet')!=='pawearDev')throw new Error('This helper only manages 127.0.0.1:27028 replica set pawearDev. Configure other databases yourself.');
@@ -26,4 +26,6 @@ require('dotenv').config({path:path.join(__dirname,'../.env'),quiet:true});
   for(let i=0;i<40;i++){if((await client.db('admin').command({hello:1})).isWritablePrimary){console.log('PAWEAR MongoDB ready on 127.0.0.1:27028 (pawearDev).');return;}await new Promise(r=>setTimeout(r,250));}
   throw new Error('Replica set primary is not ready yet.');
  }finally{await client.close();}
-})().catch(e=>{console.error(e.message);process.exitCode=1;});
+};
+module.exports={startLocalDatabase};
+if(require.main===module)startLocalDatabase().catch(e=>{console.error(e.message);process.exitCode=1;});

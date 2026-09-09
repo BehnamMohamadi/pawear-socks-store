@@ -4,8 +4,8 @@ const { getSellable } = require('../../services/shopping-services/catalog-servic
 const { catchAsync } = require('../../utils/catch-async');
 const { AppError } = require('../../utils/app-error');
 const { ApiFeatures } = require('../../utils/api-features');
-const validateProducts = async (items) => { const found = await Product.countDocuments({ _id: { $in: items.map(i => i.product) }, isActive: true }); if (found !== items.length)
-    throw new AppError(400, 'محصولات باکس باید موجود و فعال باشند.'); };
+const validateProducts = async (items) => { const found = await Product.countDocuments({ _id: { $in: items.map(i => i.product) }, isActive: true }); if (found !== new Set(items.map(i=>String(i.product))).size)
+    throw new AppError(400, 'محصولات باکس باید موجود و فعال باشند.'); for(const i of items){const s=await getSellable('Product',i.product,null,i.size);i.size=s.size;} };
 const present = async (box) => { try {
     const s = await getSellable('Box', box._id);
     return {

@@ -12,7 +12,14 @@ const validateConfig=()=>{
 };
 const start=async()=>{
  try{
-  validateConfig();await connectToDatabase();
+  validateConfig();
+  if(process.env.NODE_ENV==='development'){
+   const target=new URL(process.env.MONGODB_URI);
+   if(target.hostname==='127.0.0.1'&&target.port==='27028'&&target.searchParams.get('replicaSet')==='pawearDev'){
+    await require('./scripts/start-local-db').startLocalDatabase();
+   }
+  }
+  await connectToDatabase();
   const hello=await mongoose.connection.db.admin().command({hello:1});
   if(!hello.setName&&hello.msg!=='isdbgrid')throw new Error('PAWEAR requires MongoDB replica set transactions (even on one local node).');
   await Promise.all(Object.values(mongoose.models).map(model => model.init()));

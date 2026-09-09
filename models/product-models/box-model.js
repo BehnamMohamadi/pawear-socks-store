@@ -18,10 +18,10 @@ const boxSchema = new Schema({
         type: [{
                 product: {
                     type: Schema.Types.ObjectId, ref: 'Product', required: true
-                }, quantity: {
+                }, size:{type:String,maxlength:30,default:'free-size'}, quantity: {
                     type: Number, required: true, min: 1, validate: Number.isSafeInteger
                 }, _id: false
-            }], required: true, validate: { validator: items => items.length > 0 && items.reduce((n, i) => n + i.quantity, 0) >= 2 && new Set(items.map(i => String(i.product?._id || i.product))).size === items.length, message: 'باکس باید حداقل دو جفت و ردیف‌های غیرتکراری داشته باشد.' }
+            }], required: true, validate: { validator: items => items.length > 0 && items.reduce((n, i) => n + i.quantity, 0) >= 2 && new Set(items.map(i => String(i.product?._id || i.product)+'|'+(i.size||'free-size'))).size === items.length, message: 'باکس باید حداقل دو جفت و ردیف‌های غیرتکراری داشته باشد.' }
     },
     discount: {
         type: Number, default: 0, min: 0, max: 99, validate: Number.isSafeInteger

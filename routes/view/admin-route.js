@@ -9,6 +9,7 @@ router.use('/admin',(req,res,next)=>{
   next();
 });
 router.get('/admin',c.dashboard);
+router.get('/admin/settings',require('../../controller/admin/settings-controller').page);
 router.get('/admin/:resource',c.list);
 router.get('/admin/:resource/new',c.form);
 router.get('/admin/:resource/:id/edit',c.form);

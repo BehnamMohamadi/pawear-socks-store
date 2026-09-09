@@ -39,6 +39,7 @@ app.use(
     credentials: true,
   }),
 );
+
 app.use((req, res, next) => {
   if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
     const origin = req.get("origin");

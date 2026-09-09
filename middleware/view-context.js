@@ -12,8 +12,9 @@ exports.viewContext = async (req, res, next) => {
     res.locals.date = d => d ? new Date(d).toLocaleString('fa-IR') : '—';
     res.locals.statusLabel = require('../utils/status-labels');
     res.locals.siteUrl = (process.env.SITE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
-    res.locals.seo = { description: 'خرید جوراب فری‌سایز تکی و باکس‌های آماده از فروشگاه فارسی پاور.', canonical: res.locals.siteUrl + req.path, noindex: true, jsonld: null };
-    res.locals.shippingAmount = Number(process.env.SHIPPING_AMOUNT_TOMAN || 0);
+    res.locals.seo = { description: 'خرید جوراب تکی با سایزبندی متنوع و باکس‌های آماده از فروشگاه فارسی پاور.', canonical: res.locals.siteUrl + req.path, noindex: true, jsonld: null };
+    res.locals.shippingRates = await require('../services/shopping-services/shipping-service').getShippingSettings();
+    res.locals.shippingAmount = Math.max(res.locals.shippingRates.sockAmount,res.locals.shippingRates.boxAmount);
     if (req.cookies?.accessToken) {
       let payload;
       try { payload = verifyAccessToken(req.cookies.accessToken); } catch { /* anonymous */ }

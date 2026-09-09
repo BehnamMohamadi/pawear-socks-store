@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "PAWEAR — Backend + Admin + SSR",
+    "name": "PAWEAR V2 — Backend + Admin + SSR",
     "description": "Three synchronized phases. Enable the Postman cookie jar. Set private credentials locally, never share/export them. Log in as admin before catalog writes, then as customer before checkout. Successful creates capture IDs automatically. Requests that delete/deactivate or complete mock payments are manual, not an unattended production runner.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -1731,6 +1731,238 @@
             "header": [],
             "url": "{{baseUrl}}/orders/{{orderId}}",
             "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Request succeeded', () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08 — V2 shipping and sizes",
+      "item": [
+        {
+          "name": "Read shipping fees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/admin/settings/shipping",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Request succeeded', () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Set shipping fees (Toman)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/settings/shipping",
+            "description": "One fee per order. Mixed carts use the maximum. Paid orders keep the original fee.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sockAmount\": 45000,\n  \"boxAmount\": 70000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Request succeeded', () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create sized sock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/products",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"جوراب سایزبندی پاور\",\n  \"category\": \"{{categoryId}}\",\n  \"subCategory\": \"{{subCategoryId}}\",\n  \"price\": 100000,\n  \"sizes\": [\n    {\n      \"label\": \"40-43\",\n      \"price\": 100000,\n      \"stock\": 10,\n      \"isActive\": true\n    },\n    {\n      \"label\": \"43-46\",\n      \"price\": 120000,\n      \"stock\": 8,\n      \"isActive\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Request succeeded', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "if(pm.response.code < 300) { const data = pm.response.json().data; const value = data.product._id; if(value !== undefined) pm.collectionVariables.set('productId', String(value)); }",
+                  "if(pm.response.code < 300) { const data = pm.response.json().data; const value = data.product.slug; if(value !== undefined) pm.collectionVariables.set('productSlug', String(value)); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add selected size",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/cart",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemType\": \"Product\",\n  \"item\": \"{{productId}}\",\n  \"size\": \"40-43\",\n  \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Request succeeded', () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create fixed box with sizes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/boxes",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"باکس سایزبندی\",\n  \"products\": [\n    {\n      \"product\": \"{{productId}}\",\n      \"size\": \"40-43\",\n      \"quantity\": 1\n    },\n    {\n      \"product\": \"{{productId}}\",\n      \"size\": \"43-46\",\n      \"quantity\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Request succeeded', () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "if(pm.response.code < 300) { const data = pm.response.json().data; const value = data.box._id; if(value !== undefined) pm.collectionVariables.set('boxId', String(value)); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark packed",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/orders/admin/{{orderId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"packed\",\n  \"packingNote\": \"بسته آماده ارسال است\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Request succeeded', () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ship with carrier",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/orders/admin/{{orderId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\",\n  \"carrier\": \"پست\",\n  \"trackingCode\": \"{{trackingCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "event": [
             {

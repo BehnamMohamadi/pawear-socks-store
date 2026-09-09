@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 const snapshot = new Schema({
-    name: String, slug: String, sku: String, coverImage: String
+    size:String, name: String, slug: String, sku: String, coverImage: String
 }, { _id: false });
 const address = new Schema({
     addressId: Schema.Types.ObjectId, title: String, recipientName: String, recipientPhone: String, province: String, city: String, addressLine: String, postalCode: String, buildingNumber: String, unit: String
@@ -24,14 +24,14 @@ const orderSchema = new Schema({
                 }, discount: { type: Number, default: 0 }, components: [{
                         product: {
                             type: Schema.Types.ObjectId, ref: 'Product', required: true
-                        }, quantity: { type: Number, required: true }, name: String, sku: String, unitPrice: Number, _id: false
+                        }, quantity: { type: Number, required: true }, size:String, name: String, sku: String, unitPrice: Number, _id: false
                     }], _id: false
             }], validate: v => v.length > 0, required: true
     },
     inventory: { type: [{
                 product: {
                     type: Schema.Types.ObjectId, ref: 'Product', required: true
-                }, quantity: {
+                }, size:String, quantity: {
                     type: Number, required: true, min: 1, validate: Number.isSafeInteger
                 }, _id: false
             }], required: true },
@@ -55,6 +55,10 @@ const orderSchema = new Schema({
     paymentStatus: {
         type: String, enum: ['unpaid', 'pending', 'paid', 'failed', 'refunded'], default: 'unpaid'
     },
+    shippingPolicy:{sockAmount:Number,boxAmount:Number,mixedRule:String},
+    carrier:{type:String,maxlength:80,default:''},
+    packingNote:{type:String,maxlength:1000,default:'',select:false},
+    packedAt:Date,
     shippedAt: Date, deliveredAt: Date, customerReceivedAt: Date,
     cartRevision: { type: Number, required: true }, priceExpiresAt: { type: Date, required: true }, trackingCode: {
         type: String, default: '', maxlength: 100

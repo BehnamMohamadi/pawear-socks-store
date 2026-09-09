@@ -9,6 +9,7 @@ const productSchema = new Schema({
  subCategory:{type:Schema.Types.ObjectId,ref:'SubCategory',required:true},
  gender:{type:String,enum:['female','male','kids','unisex'],default:'unisex'},
  size:{type:String,enum:['free-size'],default:'free-size'},
+ sizes:{type:[{label:{type:String,required:true,maxlength:30},price:{type:Number,required:true,min:1,max:1000000000,validate:Number.isSafeInteger},stock:{type:Number,required:true,min:0,max:1000000,validate:Number.isSafeInteger},isActive:{type:Boolean,default:true},_id:false}],default:[]},
  brand:{type:String,trim:true,maxlength:80,default:'PAWEAR'},
  price:{type:Number,required:true,min:1,validate:Number.isSafeInteger},
  stock:{type:Number,default:0,min:0,validate:Number.isSafeInteger},
@@ -19,6 +20,12 @@ const productSchema = new Schema({
  isActive:{type:Boolean,default:true},isFeatured:{type:Boolean,default:false}
 },{timestamps:true,optimisticConcurrency:true});
 productSchema.pre('validate',function(){
+ if(this.sizes.length){
+  const {normalizeSize}=require('../../services/shopping-services/size-service');
+  this.sizes.forEach(v=>{v.label=normalizeSize(v.label);});
+  if(new Set(this.sizes.map(v=>v.label)).size!==this.sizes.length)this.invalidate('sizes','سایز تکراری مجاز نیست.');
+  const active=this.sizes.filter(v=>v.isActive);this.stock=active.reduce((n,v)=>n+v.stock,0);this.price=Math.min(...(active.length?active:this.sizes).map(v=>v.price));
+ }
  if(!this.slug&&this.name)this.slug=createSlug(this.name);
  if(!this.sku)this.sku='PA-'+randomUUID().replaceAll('-','').slice(0,16).toUpperCase();
 });
