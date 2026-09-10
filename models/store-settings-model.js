@@ -1,7 +1,3 @@
 const {Schema,model}=require('mongoose');
-module.exports=model('StoreSettings',new Schema({
- _id:{type:String,default:'shipping'},
- sockAmount:{type:Number,required:true,min:0,max:1000000000,validate:Number.isSafeInteger},
- boxAmount:{type:Number,required:true,min:0,max:1000000000,validate:Number.isSafeInteger},
- updatedBy:{type:Schema.Types.ObjectId,ref:'User'}
-},{timestamps:true}));
+const methodSchema=new Schema({key:{type:String,required:true,trim:true,lowercase:true,maxlength:40},name:{type:String,required:true,trim:true,maxlength:80},sockAmount:{type:Number,required:true,min:0,max:1000000000,validate:Number.isSafeInteger},boxAmount:{type:Number,required:true,min:0,max:1000000000,validate:Number.isSafeInteger},isActive:{type:Boolean,default:true},sortOrder:{type:Number,default:0,min:0}},{_id:false});
+module.exports=model('StoreSettings',new Schema({_id:{type:String,default:'shipping'},methods:{type:[methodSchema],default:[]},sockAmount:{type:Number,min:0,max:1000000000,validate:Number.isSafeInteger},boxAmount:{type:Number,min:0,max:1000000000,validate:Number.isSafeInteger},updatedBy:{type:Schema.Types.ObjectId,ref:'User'}},{timestamps:true}));
