@@ -32,6 +32,15 @@ function clearErrors() {
   if (statusBox) statusBox.textContent = '';
 }
 
+function clearFieldError(field) {
+  const error = document.querySelector(`[data-error-for="${field}"]`);
+  if (error) {
+    error.hidden = true;
+    error.textContent = '';
+  }
+  form?.elements[field]?.removeAttribute('aria-invalid');
+}
+
 function showFieldError(field, message) {
   const error = document.querySelector(`[data-error-for="${field}"]`);
   if (error) {
@@ -123,8 +132,8 @@ function openEditor(data = null) {
 
 provinceSelect?.addEventListener('change', () => {
   setCities(provinceSelect.value);
-  showFieldError('province', '');
-  document.querySelector('[data-error-for="province"]')?.setAttribute('hidden', '');
+  clearFieldError('province');
+  clearFieldError('city');
 });
 
 document.querySelector('#showAddressForm')?.addEventListener('click', () => openEditor());
@@ -137,29 +146,31 @@ cancelButton?.addEventListener('click', () => {
   if (document.querySelector('[data-address-card]')) editor.hidden = true;
 });
 
-document.addEventListener('click', Pawear.run(async event => {
+document.addEventListener('click', async event => {
   const edit = event.target.closest('[data-edit-address]');
   const del = event.target.closest('[data-delete-address]');
+  if (!edit && !del) return;
+  event.preventDefault();
+
   if (edit) {
     openEditor(JSON.parse(edit.dataset.editAddress));
     return;
   }
-  if (del) {
-    if (!confirm('این آدرس حذف شود؟')) return;
+
+  if (!confirm('این آدرس حذف شود؟')) return;
+  del.disabled = true;
+  try {
     await Pawear.request('/api/addresses/' + del.dataset.deleteAddress, 'DELETE');
     location.reload();
+  } catch (error) {
+    Pawear.notice(error.message || 'حذف آدرس انجام نشد.');
+    del.disabled = false;
   }
-}));
+});
 
 form?.addEventListener('input', event => {
   const field = event.target.name;
-  if (!field) return;
-  const error = document.querySelector(`[data-error-for="${field}"]`);
-  if (error) {
-    error.hidden = true;
-    error.textContent = '';
-  }
-  event.target.removeAttribute('aria-invalid');
+  if (field) clearFieldError(field);
 });
 
 form?.addEventListener('submit', Pawear.run(async event => {
@@ -177,7 +188,7 @@ form?.addEventListener('submit', Pawear.run(async event => {
   }
 }));
 
-checkoutForm?.addEventListener('submit', Pawear.run(async event => {
+checkoutForm?.addEventListener('submit', Pawear.run(async () => {
   const selected = checkoutForm.querySelector('input[name="addressId"]:checked');
   const addressError = document.querySelector('[data-error-for="addressId"]');
   if (!selected) {
