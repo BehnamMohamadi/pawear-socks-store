@@ -10,8 +10,8 @@
   <div class="container checkout-page">
     <div class="checkout-title">
       <span class="eyebrow">CHECKOUT</span>
-      <h1>تکمیل سفارش</h1>
-      <p>اول آدرس تحویل را انتخاب کن؛ اگر آدرس جدیدی لازم داری، همان‌جا اضافه‌اش کن.</p>
+      <h1>تکمیل اطلاعات ارسال</h1>
+      <p>آدرس تحویل را انتخاب کن. بعد از این مرحله، قبل از پرداخت همه جزئیات سفارش را یک‌جا بررسی می‌کنی.</p>
     </div>
 
     <div class="checkout-layout">
@@ -47,14 +47,9 @@
           </div>
 
           <p class="field-error checkout-address-error" data-error-for="addressId" hidden></p>
-          <button class="btn btn--primary checkout-continue" <%= addresses.length ? '' : 'hidden' %>>بررسی نهایی سفارش</button>
+          <button class="btn btn--primary checkout-continue" <%= addresses.length ? '' : 'hidden' %>>ادامه و بررسی نهایی سفارش</button>
+          <p class="checkout-flow-note">در این مرحله هنوز پرداختی انجام نمی‌شود و سفارش نهایی نمی‌شود.</p>
         </form>
-
-        <div id="orderPreview" hidden>
-          <h2>تأیید مبلغ</h2>
-          <p id="orderSummary"></p>
-          <button class="btn btn--primary" id="payOrder">شروع پرداخت</button>
-        </div>
       </section>
 
       <section id="addressEditor" class="address-editor" <%= addresses.length?'hidden':'' %> aria-labelledby="addressEditorTitle">
