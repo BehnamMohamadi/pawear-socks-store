@@ -1,5 +1,3 @@
-let preparedOrder = null;
-
 const editor = document.querySelector('#addressEditor');
 const form = document.querySelector('#addressForm');
 const checkoutForm = document.querySelector('#checkoutForm');
@@ -198,21 +196,15 @@ checkoutForm?.addEventListener('submit', Pawear.run(async () => {
   }
   addressError.hidden = true;
   const result = await Pawear.request('/api/orders', 'POST', { addressId: selected.value });
-  preparedOrder = result.data.order;
-  document.querySelector('#orderPreview').hidden = false;
-  document.querySelector('#orderSummary').textContent = 'جمع محصولات: ' + preparedOrder.subtotal.toLocaleString('fa-IR') + ' + ارسال: ' + preparedOrder.shippingAmount.toLocaleString('fa-IR') + ' = ' + preparedOrder.totalAmount.toLocaleString('fa-IR') + ' تومان';
+  const order = result?.data?.order;
+  if (!order?._id) throw new Error('سفارش برای بررسی نهایی آماده نشد.');
+  window.location.href = '/orders/' + order._id;
 }));
 
 checkoutForm?.addEventListener('change', () => {
-  preparedOrder = null;
-  document.querySelector('#orderPreview').hidden = true;
   const addressError = document.querySelector('[data-error-for="addressId"]');
   if (addressError) addressError.hidden = true;
 });
-
-document.querySelector('#payOrder')?.addEventListener('click', Pawear.run(async () => {
-  if (preparedOrder) await Pawear.startPayment(preparedOrder._id);
-}));
 
 if (!document.querySelector('[data-address-card]')) {
   editor.hidden = false;
