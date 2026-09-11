@@ -7,6 +7,7 @@ exports.viewContext = async (req, res, next) => {
     res.locals.user = null;
     res.locals.cartCount = 0;
     res.locals.wishlistIds = [];
+    res.locals.currentPath = req.path;
     res.locals.designPreview = require('../services/storefront/design-preview');
     res.locals.money = n => Number(n || 0).toLocaleString('fa-IR') + ' تومان';
     res.locals.date = d => d ? new Date(d).toLocaleString('fa-IR') : '—';
@@ -14,7 +15,8 @@ exports.viewContext = async (req, res, next) => {
     res.locals.siteUrl = (process.env.SITE_URL || 'http://127.0.0.1:3000').replace(/\/$/, '');
     res.locals.seo = { description: 'خرید جوراب تکی با سایزبندی متنوع و باکس‌های آماده از فروشگاه فارسی پاور.', canonical: res.locals.siteUrl + req.path, noindex: true, jsonld: null };
     res.locals.shippingRates = await require('../services/shopping-services/shipping-service').getShippingSettings();
-    res.locals.shippingAmount = Math.max(res.locals.shippingRates.sockAmount,res.locals.shippingRates.boxAmount);
+    const methods = res.locals.shippingRates?.methods || [];
+    res.locals.shippingAmount = methods.length ? Math.max(...methods.filter(m=>m.isActive!==false).map(m=>Math.max(Number(m.sockAmount||0),Number(m.boxAmount||0)))) : Math.max(Number(res.locals.shippingRates?.sockAmount||0),Number(res.locals.shippingRates?.boxAmount||0));
     if (req.cookies?.accessToken) {
       let payload;
       try { payload = verifyAccessToken(req.cookies.accessToken); } catch { /* anonymous */ }

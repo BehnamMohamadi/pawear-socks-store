@@ -1,29 +1,4 @@
-const { AppError } = require("../utils/app-error");
-
-const validate = (schema, source = "body") => {
-  return (req, res, next) => {
-    const input = req[source] ?? {};
-
-    const { error, value } = schema.validate(input, {
-      abortEarly: false,
-    });
-
-    if (error) {
-      const details = error.details.map((item) => ({
-        field: item.path.join(".") || source,
-        message: item.message,
-      }));
-
-      return next(new AppError(400, "validation failed", details));
-    }
-
-    if (source === "query") req.validatedQuery = value;
-    else req[source] = value;
-
-    next();
-  };
-};
-
-module.exports = {
-  validate,
-};
+const {AppError}=require('../utils/app-error');
+const labels={name:'نام محصول',slug:'آدرس صفحه',sku:'کد کالا',category:'دسته‌بندی',subCategory:'زیردسته',brandId:'برند',gender:'مناسب برای',price:'قیمت پایه',variants:'تنوع محصول',size:'سایز',color:'رنگ',colorCode:'کد رنگ',stock:'موجودی',description:'توضیحات'};
+const friendly=item=>{const field=item.path.join('.')||'اطلاعات';const leaf=item.path[item.path.length-1];let message=item.message.replaceAll('"','');if(item.type==='any.required'||item.type==='string.empty')message=`${labels[leaf]||leaf} الزامی است.`;else if(item.type==='any.only')message=`مقدار ${labels[leaf]||leaf} معتبر نیست.`;else if(item.type==='number.base')message=`${labels[leaf]||leaf} باید عدد باشد.`;return {field,message};};
+const validate=(schema,source='body')=>(req,res,next)=>{const {error,value}=schema.validate(req[source]??{},{abortEarly:false});if(error){const details=error.details.map(friendly);return next(new AppError(400,details.map(x=>x.message).join(' | '),details,'VALIDATION_ERROR'));}if(source==='query')req.validatedQuery=value;else req[source]=value;next();};module.exports={validate};

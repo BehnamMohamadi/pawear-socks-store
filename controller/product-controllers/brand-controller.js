@@ -1,0 +1,10 @@
+const Brand=require('../../models/product-models/brand-model');
+const Product=require('../../models/product-models/product-model');
+const {createSlug}=require('../../utils/slugify');
+const {AppError}=require('../../utils/app-error');
+const {catchAsync}=require('../../utils/catch-async');
+const getAllBrands=catchAsync(async(req,res)=>{const filter=req.user?.role==='admin'?{}:{isActive:true};const brands=await Brand.find(filter).sort('name');const counts=await Product.aggregate([{$match:{brandId:{$ne:null}}},{$group:{_id:'$brandId',count:{$sum:1}}}]);const map=new Map(counts.map(x=>[String(x._id),x.count]));res.json({status:'success',data:{brands:brands.map(b=>({...b.toObject(),productCount:map.get(String(b._id))||0}))}});});
+const addBrand=catchAsync(async(req,res)=>{const data={...req.body};if(data.slug)data.slug=createSlug(data.slug);const brand=await Brand.create(data);res.status(201).json({status:'success',data:{brand}});});
+const editBrand=catchAsync(async(req,res,next)=>{const brand=await Brand.findById(req.params.brandId);if(!brand)return next(new AppError(404,'برند پیدا نشد.'));for(const k of ['name','logo','description','isActive'])if(req.body[k]!==undefined)brand[k]=req.body[k];if(req.body.slug!==undefined)brand.slug=createSlug(req.body.slug);await brand.save();res.json({status:'success',data:{brand}});});
+const deleteBrand=catchAsync(async(req,res,next)=>{const brand=await Brand.findById(req.params.brandId);if(!brand)return next(new AppError(404,'برند پیدا نشد.'));if(await Product.exists({brandId:brand._id}))throw new AppError(409,'این برند محصول دارد؛ به جای حذف آن را غیرفعال کنید.');await brand.deleteOne();res.status(204).send();});
+module.exports={getAllBrands,addBrand,editBrand,deleteBrand};

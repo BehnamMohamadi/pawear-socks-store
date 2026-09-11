@@ -75,3 +75,51 @@
   reduced.addEventListener('change', event => { manualPause = event.matches; updatePause(); });
   updatePause();
 })();
+
+(() => {
+  const carousel = document.querySelector('[data-featured-carousel]');
+  if (!carousel) return;
+  const track = carousel.querySelector('.featured-carousel-track');
+  const prev = document.querySelector('[data-featured-prev]');
+  const next = document.querySelector('[data-featured-next]');
+  let dragging = false, startX = 0, startScroll = 0, moved = false;
+
+  const step = () => {
+    const slide = track.querySelector('.featured-carousel-slide');
+    if (!slide) return carousel.clientWidth * .8;
+    const gap = parseFloat(getComputedStyle(track).gap) || 0;
+    return slide.getBoundingClientRect().width + gap;
+  };
+  const move = direction => carousel.scrollBy({ left: direction * step(), behavior: 'smooth' });
+
+  // In an RTL scroller the physical arrow direction is more intuitive for customers.
+  prev?.addEventListener('click', () => move(1));
+  next?.addEventListener('click', () => move(-1));
+  carousel.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
+    if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
+  });
+  carousel.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'touch') return;
+    dragging = true; moved = false; startX = event.clientX; startScroll = carousel.scrollLeft;
+    carousel.classList.add('is-dragging');
+    carousel.setPointerCapture(event.pointerId);
+  });
+  carousel.addEventListener('pointermove', event => {
+    if (!dragging) return;
+    const delta = event.clientX - startX;
+    if (Math.abs(delta) > 4) moved = true;
+    carousel.scrollLeft = startScroll - delta;
+  });
+  const stopDrag = event => {
+    if (!dragging) return;
+    dragging = false;
+    carousel.classList.remove('is-dragging');
+    if (carousel.hasPointerCapture(event.pointerId)) carousel.releasePointerCapture(event.pointerId);
+  };
+  carousel.addEventListener('pointerup', stopDrag);
+  carousel.addEventListener('pointercancel', stopDrag);
+  carousel.addEventListener('click', event => {
+    if (moved) { event.preventDefault(); event.stopPropagation(); moved = false; }
+  }, true);
+})();

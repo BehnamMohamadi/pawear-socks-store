@@ -1,15 +1,7 @@
 const Settings=require('../../models/store-settings-model');
 const {AppError}=require('../../utils/app-error');
-async function getShippingSettings(session){
- let query=Settings.findById('shipping').lean();if(session)query=query.session(session);
- const saved=await query;if(saved)return saved;
- const amount=Number(process.env.SHIPPING_AMOUNT_TOMAN||0);
- if(!Number.isSafeInteger(amount)||amount<0)throw new AppError(503,'تنظیمات هزینه ارسال معتبر نیست.');
- return {sockAmount:amount,boxAmount:amount};
-}
-async function quoteShipping(items,session){
- const rates=await getShippingSettings(session);
- return {shippingAmount:Math.max(0,...items.map(i=>i.itemType==='Box'?rates.boxAmount:rates.sockAmount)),
- shippingPolicy:{sockAmount:rates.sockAmount,boxAmount:rates.boxAmount,mixedRule:'maximum'}};
-}
-module.exports={getShippingSettings,quoteShipping};
+const defaults=amount=>[{key:'post',name:'پست',sockAmount:amount,boxAmount:amount,isActive:true,sortOrder:1},{key:'tipax',name:'تیپاکس',sockAmount:amount,boxAmount:amount,isActive:true,sortOrder:2},{key:'courier',name:'پیک',sockAmount:amount,boxAmount:amount,isActive:true,sortOrder:3}];
+async function getShippingSettings(session){let query=Settings.findById('shipping').lean();if(session)query=query.session(session);const saved=await query;if(saved?.methods?.length)return saved;const amount=Number(saved?.sockAmount??process.env.SHIPPING_AMOUNT_TOMAN??0);if(!Number.isSafeInteger(amount)||amount<0)throw new AppError(503,'تنظیمات هزینه ارسال معتبر نیست.');const box=Number(saved?.boxAmount??amount);return {...saved,methods:defaults(amount).map(m=>({...m,boxAmount:box}))};}
+async function getShippingMethods(items,session){const settings=await getShippingSettings(session);return settings.methods.filter(m=>m.isActive).sort((a,b)=>a.sortOrder-b.sortOrder).map(m=>({...m,amount:Math.max(0,...items.map(i=>i.itemType==='Box'?m.boxAmount:m.sockAmount))}));}
+async function quoteShipping(items,session,methodKey){const methods=await getShippingMethods(items,session);if(!methods.length)throw new AppError(503,'هیچ روش ارسال فعالی تعریف نشده است.');const method=methods.find(m=>m.key===methodKey)||methods[0];return {shippingAmount:method.amount,shippingMethod:{key:method.key,name:method.name},shippingPolicy:{methodKey:method.key,methodName:method.name,sockAmount:method.sockAmount,boxAmount:method.boxAmount,mixedRule:'maximum'}};}
+module.exports={getShippingSettings,getShippingMethods,quoteShipping};
