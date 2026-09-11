@@ -48,6 +48,7 @@ const addressSchema = new Schema(
       type: String,
       required: [true, "address line is required"],
       trim: true,
+      minlength: [10, "address line must be minimum 10 characters"],
       maxlength: [500, "address line must be maximum 500 characters"],
     },
 
@@ -60,15 +61,15 @@ const addressSchema = new Schema(
 
     buildingNumber: {
       type: String,
+      required: [true, "building number is required"],
       trim: true,
-      maxlength: [20, "building number must be maximum 20 characters"],
-      default: "",
+      match: [/^\d{1,10}$/, "building number must be numeric"],
     },
 
     unit: {
       type: String,
       trim: true,
-      maxlength: [20, "unit must be maximum 20 characters"],
+      match: [/^$|^\d{1,6}$/, "unit must be numeric"],
       default: "",
     },
 
