@@ -1,1 +1,139 @@
-<!doctype html><html lang="fa" dir="rtl"><head><%- include('../../shared/seo/head') %><link rel="stylesheet" href="/stylesheet/pages/checkout/checkout.css"></head><body><%- include('../../shared/header/header') %><main id="main-content" class="page-shell"><div class="container"><h1>تکمیل سفارش</h1><div class="checkout-layout"><section><div class="checkout-section-head"><h2>آدرس دریافت</h2><button type="button" class="btn btn--outline" id="showAddressForm">+ آدرس جدید</button></div><form id="checkoutForm" class="paw-form"><div id="addressList"><%addresses.forEach((a,i)=>{%><article class="address-card" data-address-card="<%= a._id %>"><label><input type="radio" name="addressId" value="<%= a._id %>" <%= (a.isDefault||(!addresses.some(x=>x.isDefault)&&i===0))?'checked':'' %> required><strong><%= a.title %> — <%= a.recipientName %></strong><span><%= a.province %>، <%= a.city %>، <%= a.addressLine %> — <%= a.postalCode %></span></label><div class="address-actions"><button type="button" data-edit-address='<%- JSON.stringify(a) %>'>ویرایش</button><button type="button" data-delete-address="<%= a._id %>">حذف</button></div></article><%})%></div><%if(addresses.length){%><button class="btn btn--primary">بررسی نهایی سفارش</button><%}else{%><p>برای ادامه یک آدرس ثبت کن.</p><%}%></form><div id="orderPreview" hidden><h2>تأیید مبلغ</h2><p id="orderSummary"></p><button class="btn btn--primary" id="payOrder">شروع پرداخت</button></div></section><section id="addressEditor" <%= addresses.length?'hidden':'' %>><div class="checkout-section-head"><h2 id="addressEditorTitle">آدرس جدید</h2><button type="button" id="cancelAddress" class="btn btn--outline">انصراف</button></div><form id="addressForm" class="paw-form" data-id=""><%for(const [key,label] of Object.entries({title:'عنوان آدرس',recipientName:'نام گیرنده',recipientPhone:'موبایل گیرنده',province:'استان',city:'شهر',addressLine:'آدرس کامل',postalCode:'کد پستی ۱۰ رقمی',buildingNumber:'پلاک',unit:'واحد'})){%><label><%= label %><input name="<%= key %>" <%= ['buildingNumber','unit'].includes(key)?'':'required' %> maxlength="<%= key==='addressLine'?500:80 %>"></label><%}%><button class="btn btn--primary">ذخیره آدرس</button></form></section></div></div></main><%- include('../../shared/footer/footer') %><script src="/javascript/shared/header/header.js" defer></script><script src="/javascript/pages/checkout/checkout.js" defer></script></body></html>
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <%- include('../../shared/seo/head') %>
+  <link rel="stylesheet" href="/stylesheet/pages/checkout/checkout.css">
+</head>
+<body>
+<%- include('../../shared/header/header') %>
+<main id="main-content" class="page-shell">
+  <div class="container checkout-page">
+    <div class="checkout-title">
+      <span class="eyebrow">CHECKOUT</span>
+      <h1>تکمیل سفارش</h1>
+      <p>اول آدرس تحویل را انتخاب کن؛ اگر آدرس جدیدی لازم داری، همان‌جا اضافه‌اش کن.</p>
+    </div>
+
+    <div class="checkout-layout">
+      <section class="checkout-addresses" aria-labelledby="addressHeading">
+        <div class="checkout-section-head">
+          <div>
+            <h2 id="addressHeading">آدرس دریافت</h2>
+            <p><%= addresses.length ? 'یکی از آدرس‌های ذخیره‌شده را انتخاب کن.' : 'هنوز آدرسی ذخیره نکردی.' %></p>
+          </div>
+          <button type="button" class="btn btn--outline" id="showAddressForm">+ آدرس جدید</button>
+        </div>
+
+        <form id="checkoutForm" class="paw-form" novalidate>
+          <div id="addressList" class="address-list">
+            <% addresses.forEach((a,i)=>{ %>
+              <article class="address-card" data-address-card="<%= a._id %>">
+                <label class="address-card__select">
+                  <input type="radio" name="addressId" value="<%= a._id %>" <%= (a.isDefault||(!addresses.some(x=>x.isDefault)&&i===0))?'checked':'' %> required>
+                  <span class="address-card__radio" aria-hidden="true"></span>
+                  <span class="address-card__content">
+                    <strong><%= a.title %> <%= a.isDefault ? '· پیش‌فرض' : '' %></strong>
+                    <span><%= a.recipientName %> · <%= a.recipientPhone %></span>
+                    <span><%= a.province %>، <%= a.city %>، <%= a.addressLine %>، پلاک <%= a.buildingNumber %><%= a.unit ? `، واحد ${a.unit}` : '' %></span>
+                    <small>کدپستی: <%= a.postalCode %></small>
+                  </span>
+                </label>
+                <div class="address-actions">
+                  <button type="button" data-edit-address='<%- JSON.stringify(a).replace(/'/g,"&#39;") %>'>ویرایش</button>
+                  <button type="button" data-delete-address="<%= a._id %>">حذف</button>
+                </div>
+              </article>
+            <% }) %>
+          </div>
+
+          <p class="field-error checkout-address-error" data-error-for="addressId" hidden></p>
+          <button class="btn btn--primary checkout-continue" <%= addresses.length ? '' : 'hidden' %>>بررسی نهایی سفارش</button>
+        </form>
+
+        <div id="orderPreview" hidden>
+          <h2>تأیید مبلغ</h2>
+          <p id="orderSummary"></p>
+          <button class="btn btn--primary" id="payOrder">شروع پرداخت</button>
+        </div>
+      </section>
+
+      <section id="addressEditor" class="address-editor" <%= addresses.length?'hidden':'' %> aria-labelledby="addressEditorTitle">
+        <div class="checkout-section-head">
+          <div>
+            <h2 id="addressEditorTitle">آدرس جدید</h2>
+            <p>استان و شهر را فقط از فهرست انتخاب کن.</p>
+          </div>
+          <button type="button" id="cancelAddress" class="btn btn--outline" <%= addresses.length?'':'hidden' %>>انصراف</button>
+        </div>
+
+        <form id="addressForm" class="paw-form address-form" data-id="" novalidate>
+          <label>عنوان آدرس
+            <input name="title" type="text" required minlength="1" maxlength="40" autocomplete="address-level4" placeholder="مثلاً خانه یا محل کار">
+            <small class="field-error" data-error-for="title" hidden></small>
+          </label>
+
+          <label>نام گیرنده
+            <input name="recipientName" type="text" required minlength="2" maxlength="80" autocomplete="name" placeholder="نام و نام خانوادگی">
+            <small class="field-error" data-error-for="recipientName" hidden></small>
+          </label>
+
+          <label>شماره موبایل گیرنده
+            <input name="recipientPhone" type="tel" required inputmode="numeric" autocomplete="tel" maxlength="11" pattern="09[0-9]{9}" placeholder="09123456789" dir="ltr">
+            <small class="field-error" data-error-for="recipientPhone" hidden></small>
+          </label>
+
+          <label>استان
+            <select name="province" id="provinceSelect" required autocomplete="address-level1">
+              <option value="">انتخاب استان</option>
+              <% iranLocations.forEach(item=>{ %><option value="<%= item.province %>"><%= item.province %></option><% }) %>
+            </select>
+            <small class="field-error" data-error-for="province" hidden></small>
+          </label>
+
+          <label>شهر
+            <select name="city" id="citySelect" required autocomplete="address-level2" disabled>
+              <option value="">اول استان را انتخاب کن</option>
+            </select>
+            <small class="field-error" data-error-for="city" hidden></small>
+          </label>
+
+          <label class="address-line-field">آدرس کامل
+            <textarea name="addressLine" required minlength="10" maxlength="500" rows="3" autocomplete="street-address" placeholder="خیابان، کوچه، مجتمع و توضیحات لازم برای تحویل"></textarea>
+            <small class="field-hint">حداقل ۱۰ کاراکتر؛ پلاک و واحد را در فیلدهای جدا وارد کن.</small>
+            <small class="field-error" data-error-for="addressLine" hidden></small>
+          </label>
+
+          <label>کد پستی
+            <input name="postalCode" type="text" required inputmode="numeric" autocomplete="postal-code" maxlength="10" pattern="[0-9]{10}" placeholder="۱۰ رقم" dir="ltr">
+            <small class="field-error" data-error-for="postalCode" hidden></small>
+          </label>
+
+          <label>پلاک
+            <input name="buildingNumber" type="text" required inputmode="numeric" maxlength="10" pattern="[0-9]+" placeholder="مثلاً ۱۲" dir="ltr">
+            <small class="field-error" data-error-for="buildingNumber" hidden></small>
+          </label>
+
+          <label>واحد
+            <input name="unit" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]*" placeholder="مثلاً ۳" dir="ltr">
+            <small class="field-error" data-error-for="unit" hidden></small>
+          </label>
+
+          <label class="default-address-field">
+            <input name="isDefault" type="checkbox" value="true">
+            <span>این آدرس، آدرس پیش‌فرض من باشد</span>
+          </label>
+
+          <div class="address-form__status" id="addressFormStatus" role="status" aria-live="polite"></div>
+          <button class="btn btn--primary address-save">ذخیره آدرس</button>
+        </form>
+      </section>
+    </div>
+  </div>
+</main>
+
+<%- include('../../shared/footer/footer') %>
+<script id="iranLocations" type="application/json" nonce="<%= nonce %>"><%- JSON.stringify(iranLocations).replace(/</g,'\\u003c') %></script>
+<script src="/javascript/shared/header/header.js" defer></script>
+<script src="/javascript/pages/checkout/checkout.js" defer></script>
+</body>
+</html>
