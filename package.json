@@ -16,6 +16,7 @@
     "postman:build": "node scripts/build-postman.js"
   },
   "dependencies": {
+    "@code-plate/iran-cities": "^1.0.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
