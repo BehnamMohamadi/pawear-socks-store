@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
+const { installDatabaseSafety } = require("../utils/database-safety");
 
 const connectToDatabase = async () => {
   if (!process.env.MONGODB_URI) {
     throw new Error("MONGODB_URI is not configured");
   }
   await mongoose.connect(process.env.MONGODB_URI);
+  installDatabaseSafety(mongoose.connection);
 };
 
 mongoose.connection.once("connected", () => {
