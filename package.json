@@ -6,16 +6,18 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon app.js",
-    "dev:local": "npm run db:local && npm run dev",
+    "dev:local": "npm run db:local && npm run db:backup && npm run dev",
     "start": "node app.js",
     "test": "node scripts/test-backend.js",
     "check": "node scripts/check.js",
     "seed:admin": "node scripts/seed-admin.js",
     "db:local": "node scripts/start-local-db.js",
+    "db:backup": "node scripts/backup-local-db.js",
     "setup:admin": "node scripts/setup-local-admin.js",
     "postman:build": "node scripts/build-postman.js"
   },
   "dependencies": {
+    "@code-plate/iran-cities": "^1.0.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
