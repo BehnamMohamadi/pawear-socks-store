@@ -4,8 +4,24 @@ const { getSellable } = require('../../services/shopping-services/catalog-servic
 const { catchAsync } = require('../../utils/catch-async');
 const { AppError } = require('../../utils/app-error');
 const { ApiFeatures } = require('../../utils/api-features');
-const validateProducts = async (items) => { const found = await Product.countDocuments({ _id: { $in: items.map(i => i.product) }, isActive: true }); if (found !== new Set(items.map(i=>String(i.product))).size)
-    throw new AppError(400, 'محصولات باکس باید موجود و فعال باشند.'); for(const i of items){const s=await getSellable('Product',i.product,null,i.size);i.size=s.size;} };
+const validateProducts = async (items) => {
+    if (!Array.isArray(items) || !items.length) throw new AppError(400, 'حداقل یک محصول برای باکس انتخاب کنید.');
+    const ids = [...new Set(items.map(i => String(i.product)))];
+    const found = await Product.countDocuments({ _id: { $in: ids }, isActive: true });
+    if (found !== ids.length) throw new AppError(400, 'محصولات باکس باید موجود و فعال باشند.');
+    for (const i of items) {
+        const s = await getSellable('Product', i.product, null, {
+            variantId: i.variantId || undefined,
+            size: i.size || undefined,
+            color: i.color || undefined
+        });
+        if (!s.variantId) throw new AppError(400, 'تنوع انتخاب‌شده برای یکی از محصولات معتبر نیست.');
+        if (s.stock < i.quantity) throw new AppError(409, `موجودی تنوع «${s.record.name} · ${s.size}${s.color ? ' · ' + s.color : ''}» کافی نیست.`, { productName: s.record.name, availableStock: s.stock, requestedQuantity: i.quantity }, 'INSUFFICIENT_STOCK');
+        i.variantId = s.variantId;
+        i.size = s.size;
+        i.color = s.color || '';
+    }
+};
 const present = async (box) => { try {
     const s = await getSellable('Box', box._id);
     return {
